@@ -87,10 +87,9 @@ export function GamesScreen({
           keyboardShouldPersistTaps="handled"
           style={styles.list}
         >
-          {visibleGames.map((game, index) => (
+          {visibleGames.map((game) => (
             <GameCard
               game={game}
-              isFirst={index === 0}
               key={game.id}
               onDelete={onDeleteGame}
               onPress={onEditGame}
@@ -135,19 +134,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
   },
-  // One bounded panel instead of separate cards. The border and background sit on the
-  // scroller, so they stay fixed on all four sides while the rows slide inside it.
+  // Only a fixed top line, as in GymBro. Rows slide under it and carry their own
+  // frames, so a single row looks like one element rather than a half empty panel.
   list: {
-    backgroundColor: colors.subtleBackground,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
     flex: 1,
-    overflow: 'hidden',
+    marginTop: 2,
   },
   listContent: {
     flexGrow: 1,
-    paddingBottom: 8,
+    gap: 8,
+    paddingBottom: 24,
+    paddingTop: 10,
   },
   pressedButton: {
     opacity: 0.7,

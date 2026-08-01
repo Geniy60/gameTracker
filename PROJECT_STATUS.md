@@ -41,18 +41,18 @@ query, so lazy mounting would add code without saving work. One consequence is t
 now keeps its own search text.
 
 All tabs share the same screen component and show a search row, an add button, and a list of
-games. Rows are separated by a hairline rather than drawn as individual cards, so the list
-stays dense. Tapping a row opens the edit screen; the trash button deletes after a
-confirmation dialog.
+games. Tapping a row opens the edit screen; the trash button deletes after a confirmation
+dialog.
 
-The list is one bounded panel rather than a stack of separate cards. The scroller carries the
-background, the rounded corners, and a border on all four sides, so the frame stays fixed
-while rows slide inside it. Each row carries only a top hairline, and the first row drops
-even that because the panel border already draws the top edge.
+The list styling follows GymBro's tile lists and is two separate things that must not be
+merged. The scroller carries only a fixed top line, which rows slide under while scrolling.
+Every row carries its own background, border and rounded corners, so a list holding one game
+looks like one element rather than a mostly empty container. Rows are simply denser than
+GymBro's tiles, not frameless.
 
-The panel uses `subtleBackground` rather than `panel`, which was too close to the app
-background to read as a distinct surface. Row action buttons use the darker `panel` so they
-stay visible against it.
+Rows use `subtleBackground`; `panel` and `surface` both sit too close to the app background
+to read as separate elements. Row action buttons use the darker `panel` so they stay visible
+against the row.
 
 Each row can also carry one quick-step button, the single obvious next move for that game:
 a wanted game offers "bought it", an owned unplayed game offers "played it", and a game that
@@ -106,7 +106,7 @@ Added quick-step buttons, per-tab sorting, and a denser list.
 
 Details:
 
-- Rows lost their individual card chrome; the list became one bounded panel instead.
+- Rows keep their individual frames and are denser; the scroller adds a fixed top line.
 - `createQuickStep` derives the next move from the game itself rather than from the tab, so
   the button is correct wherever the game is shown.
 - Added `createdAt` to the model for wishlist sorting. Verified against the database that

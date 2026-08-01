@@ -10,7 +10,6 @@ import type { Game, MainTab } from '../../types';
 
 type GameCardProps = {
   game: Game;
-  isFirst: boolean;
   onDelete: (game: Game) => void;
   onPress: (game: Game) => void;
   onQuickStep: (game: Game) => void;
@@ -50,7 +49,6 @@ function createMetaParts(game: Game, tab: MainTab): string[] {
 
 export function GameCard({
   game,
-  isFirst,
   onDelete,
   onPress,
   onQuickStep,
@@ -62,11 +60,7 @@ export function GameCard({
   return (
     <Pressable
       onPress={() => onPress(game)}
-      style={({ pressed }) => [
-        styles.row,
-        isFirst && styles.firstRow,
-        pressed && styles.pressedRow,
-      ]}
+      style={({ pressed }) => [styles.row, pressed && styles.pressedRow]}
     >
       <View style={styles.info}>
         <Text numberOfLines={1} style={styles.name}>
@@ -114,20 +108,19 @@ export function GameCard({
 }
 
 const styles = StyleSheet.create({
-  // Rows are separated by a hairline instead of being individual cards, so the list
-  // stays dense. The first row drops its line because the panel already has a border.
+  // Each row is its own framed element, like a GymBro tile, just denser. A list of
+  // one then looks like one element instead of a mostly empty container.
   row: {
     alignItems: 'center',
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
+    backgroundColor: colors.subtleBackground,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    minHeight: 56,
+    minHeight: 52,
     paddingHorizontal: 12,
     paddingVertical: 8,
-  },
-  firstRow: {
-    borderTopWidth: 0,
   },
   pressedRow: {
     opacity: 0.6,

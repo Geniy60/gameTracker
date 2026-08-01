@@ -117,7 +117,6 @@ export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScre
 
         <View style={styles.field}>
           <Text style={styles.label}>{strings.gameForm.accessLabel}</Text>
-          <Text style={styles.hint}>{strings.gameForm.accessHint}</Text>
           <OptionChips
             onSelect={setAccess}
             options={accessOptions}
@@ -148,7 +147,6 @@ export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScre
         {isPlayed ? (
           <View style={styles.field}>
             <Text style={styles.label}>{strings.gameForm.ratingLabel}</Text>
-            <Text style={styles.hint}>{strings.gameForm.ratingHint}</Text>
             <OptionChips
               onSelect={setRating}
               options={ratingOptions}
@@ -199,11 +197,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
     fontWeight: '700',
-  },
-  hint: {
-    color: colors.muted,
-    fontSize: 13,
-    marginTop: -4,
   },
   input: {
     backgroundColor: colors.surface,

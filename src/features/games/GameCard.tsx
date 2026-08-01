@@ -4,28 +4,40 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { hasMultiplePlatforms } from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
-import type { Game } from '../../types';
+import type { Game, MainTab } from '../../types';
 
 type GameCardProps = {
   game: Game;
   onDelete: (game: Game) => void;
   onPress: (game: Game) => void;
+  tab: MainTab;
 };
 
-export function GameCard({ game, onDelete, onPress }: GameCardProps) {
-  const metaParts: string[] = [];
+// Metadata that every card in the current tab would repeat is left out.
+function createMetaParts(game: Game, tab: MainTab): string[] {
+  const parts: string[] = [];
 
   if (hasMultiplePlatforms()) {
-    metaParts.push(strings.platforms[game.platform]);
+    parts.push(strings.platforms[game.platform]);
   }
 
   if (game.access !== null) {
-    metaParts.push(strings.access[game.access]);
+    parts.push(strings.access[game.access]);
+  }
+
+  if (game.isPlayed && tab !== 'played') {
+    parts.push(strings.list.playedMark);
   }
 
   if (game.rating !== null) {
-    metaParts.push(strings.list.ratingValue(game.rating));
+    parts.push(strings.list.ratingValue(game.rating));
   }
+
+  return parts;
+}
+
+export function GameCard({ game, onDelete, onPress, tab }: GameCardProps) {
+  const metaParts = createMetaParts(game, tab);
 
   return (
     <Pressable

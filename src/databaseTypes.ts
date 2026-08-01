@@ -1,4 +1,4 @@
-import type { GameAccess, GamePlatform, GameStatus } from './types';
+import type { GameAccess, GamePlatform } from './types';
 
 export type Json =
   | string
@@ -16,29 +16,29 @@ export type Database = {
           access: GameAccess | null;
           created_at: string;
           id: string;
+          is_played: boolean;
           name: string;
           note: string;
           platform: GamePlatform;
           rating: number | null;
-          status: GameStatus;
           updated_at: string;
         };
         Insert: {
           access?: GameAccess | null;
           id: string;
+          is_played?: boolean;
           name: string;
           note?: string;
           platform?: GamePlatform;
           rating?: number | null;
-          status: GameStatus;
         };
         Update: {
           access?: GameAccess | null;
+          is_played?: boolean;
           name?: string;
           note?: string;
           platform?: GamePlatform;
           rating?: number | null;
-          status?: GameStatus;
         };
         Relationships: [];
       };

@@ -7,12 +7,24 @@ personal video game lists.
 
 The app uses a single dark palette. There is no theme switcher and no settings screen yet.
 
-The app shell has a compact header with a manual refresh action and three main tabs, which
-are one lifecycle rather than independent lists:
+A game has two independent properties rather than one status:
 
-- Wishlist (wanted, no access yet)
-- Available (the user can play it but has not)
-- Played
+- `access`: `purchased`, `friend`, `subscription`, or `null` for no access at all
+- `isPlayed`: whether the user has played it
+
+The three main tabs are filters over those two fields, not mutually exclusive buckets:
+
+- Wanted: no access and never played
+- Available: access is set, played or not
+- Played: played, with or without access
+
+This matters because a game stays in the available list after it is finished, and losing
+access to a finished game removes it from available while it stays in played. The filter
+lives in `src/gameFilters.ts` and is the one part of the app with unit tests, since the
+overlap between the tabs is easy to get wrong.
+
+A played game whose access is gone does not reappear in the wanted list. That was an
+explicit decision, not an accident of the filter.
 
 Tab labels are deliberately short because three tabs share one row.
 
@@ -21,17 +33,17 @@ of game cards. A card shows the game name plus platform and rating metadata. Tap
 opens the edit screen; the trash button on the card deletes the game after a confirmation
 dialog.
 
-The add/edit screen is one form with name, status, access, platform, rating, and note fields.
+The add/edit screen is one form with name, access, played, platform, rating, and note
+fields. Access and played are always editable, since they are what move a game between
+tabs. Rating appears only for played games and is cleared on save otherwise; the database
+enforces the same rule with a check constraint.
 
-Two fields are conditional, and both are cleared on save when they do not apply:
+A new game inherits its defaults from the tab the add button was pressed on, so adding from
+the available tab starts as purchased and unplayed.
 
-- Rating is shown only for the `played` status.
-- Access (`purchased`, `friend`, `subscription`) is hidden for `wishlist`, because a wanted
-  game is by definition one the user cannot reach yet. It stays visible for `played` so the
-  user can still see that a finished game came from a subscription.
-
-The database enforces both rules with check constraints, so the app and the schema cannot
-drift apart.
+Saving can move a game out of the tab it was edited in. When that happens the app switches
+to the tab where the game now belongs instead of returning to a list that no longer contains
+it.
 
 PlayStation is currently the only platform. The available platforms are listed in
 `src/gamePlatforms.ts`, and both the form picker and the platform label on cards are hidden
@@ -59,7 +71,23 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
-Added the third status and the access field.
+Replaced the single status column with independent access and played fields.
+
+Details:
+
+- The previous three value status was wrong: it forced a game to sit in exactly one tab,
+  but an owned game that has been played belongs in both available and played.
+- Applied `supabase/migrations/20260801190000_gametracker_access_and_played.sql`: added
+  `is_played`, carried the old status values over, dropped `status` and its constraints, and
+  re-pointed the rating constraint at `is_played`.
+- Added `src/gameFilters.ts` with `filterGamesByTab` and `findTabForGame`, plus the first
+  unit tests in the project. Six tests pass.
+- Verified through the REST API that an owned played game and a played game without access
+  both insert, and that a rating without `is_played` is rejected. Test rows were removed.
+
+Previous step:
+
+Added the third tab and the access field.
 
 Details:
 
@@ -104,8 +132,8 @@ delete a game, and confirm the data survives an app restart.
 
 ## Important Decisions And Open Questions
 
-- Three statuses (`wishlist`, `available`, `played`). A "playing now" status was discussed
-  and deliberately deferred.
+- No status field. Tabs are derived from `access` and `isPlayed`. A "playing now" flag was
+  discussed and deliberately deferred.
 - Dark theme only. A light theme was deliberately deferred.
 - No per-user scoping. The app is single user, unlike GymBro which has a user selector.
 - Open question: the GitHub repository visibility is unknown. Real Supabase keys are kept

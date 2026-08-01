@@ -1,36 +1,36 @@
-import type { GameAccess, GamePlatform, GameStatus } from './types';
+import type { GameAccess, GamePlatform, MainTab } from './types';
 
 export const strings = {
   app: {
     title: 'GameTracker',
   },
-  // Short labels: three tabs share one row, so the full status names do not fit.
+  // Short labels: three tabs share one row, so longer names do not fit.
   tabs: {
     wishlist: 'Хочу',
     available: 'Есть',
     played: 'Играл',
-  } satisfies Record<GameStatus, string>,
+  } satisfies Record<MainTab, string>,
   search: {
     games: 'Поиск игры',
   },
   empty: {
     wishlist: {
       title: 'Список желаний пуст',
-      message: 'Нажми «+», чтобы добавить игру, в которую хочешь поиграть.',
+      message: 'Здесь будут игры, к которым пока нет доступа, но поиграть хочется.',
     },
     available: {
       title: 'Доступных игр пока нет',
-      message: 'Нажми «+», чтобы добавить игру, к которой есть доступ, но руки не дошли.',
+      message: 'Здесь будут игры, к которым есть доступ: купленные, из подписки или у друга.',
     },
     played: {
       title: 'Пройденных игр пока нет',
-      message: 'Нажми «+», чтобы добавить игру, в которую уже играл.',
+      message: 'Здесь будут игры, в которые ты уже играл, даже если доступ к ним пропал.',
     },
     filtered: {
       title: 'Ничего не найдено',
       message: 'Попробуй изменить запрос или сбросить поиск.',
     },
-  },
+  } satisfies Record<MainTab | 'filtered', { message: string; title: string }>,
   actions: {
     cancel: 'Отмена',
     delete: 'Удалить',
@@ -43,8 +43,12 @@ export const strings = {
     editTitle: 'Редактирование игры',
     nameLabel: 'Название',
     namePlaceholder: 'Например, Hollow Knight',
-    statusLabel: 'Статус',
     accessLabel: 'Доступ',
+    accessHint: 'Пропал доступ — выбери «Нет доступа», игра останется в «Играл»',
+    accessNone: 'Нет доступа',
+    playedLabel: 'Играл в неё',
+    playedNo: 'Ещё нет',
+    playedYes: 'Играл',
     platformLabel: 'Платформа',
     ratingLabel: 'Оценка',
     ratingHint: 'От 1 до 10, можно не ставить',
@@ -52,11 +56,6 @@ export const strings = {
     noteLabel: 'Заметка',
     notePlaceholder: 'Мысли об игре, на чём остановился и так далее',
   },
-  status: {
-    wishlist: 'Хочу поиграть',
-    available: 'Есть доступ',
-    played: 'Играл',
-  } satisfies Record<GameStatus, string>,
   access: {
     purchased: 'Куплено',
     friend: 'Есть у друга',
@@ -86,6 +85,7 @@ export const strings = {
   },
   list: {
     loadError: 'Не удалось загрузить список игр.',
+    playedMark: 'Играл',
     ratingValue: (rating: number) => `Оценка: ${rating}/10`,
   },
 };

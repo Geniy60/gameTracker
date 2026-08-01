@@ -1,9 +1,9 @@
-// The three statuses are one lifecycle: wanted, then available, then played.
-export type GameStatus = 'wishlist' | 'available' | 'played';
+// Access and isPlayed are independent. The tabs are filters over them, not a status:
+// a game stays in the available list after it is played, and a played game whose
+// access is gone stays in the played list.
+export type MainTab = 'wishlist' | 'available' | 'played';
 
-export type MainTab = GameStatus;
-
-// How the user can reach the game. Wishlist games have no access by definition.
+// How the user can reach the game right now. null means no access at all.
 export type GameAccess = 'purchased' | 'friend' | 'subscription';
 
 // Only PlayStation is used right now. To add a platform later, extend this union
@@ -14,8 +14,8 @@ export type GamePlatform = 'playstation';
 export type Game = {
   id: string;
   name: string;
-  status: GameStatus;
   access: GameAccess | null;
+  isPlayed: boolean;
   platform: GamePlatform;
   rating: number | null;
   note: string;

@@ -1,6 +1,7 @@
-import type { Game, GameStatus } from './types';
+import type { Game, MainTab } from './types';
 
 export type RootStackParamList = {
   Home: undefined;
-  GameForm: { game: Game | null; initialStatus: GameStatus };
+  // The tab the user pressed "add" from decides the new game's defaults.
+  GameForm: { game: Game | null; sourceTab: MainTab };
 };

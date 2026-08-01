@@ -20,28 +20,26 @@ import {
 } from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
-import type { Game, GameAccess, GamePlatform, GameStatus } from '../../types';
+import type { Game, GameAccess, GamePlatform, MainTab } from '../../types';
 
 type GameFormScreenProps = {
   game: Game | null;
-  initialStatus: GameStatus;
   onBack: () => void;
   onSave: (game: Game) => void;
+  sourceTab: MainTab;
 };
 
-const statusOptions: { label: string; value: GameStatus }[] = [
-  { label: strings.status.wishlist, value: 'wishlist' },
-  { label: strings.status.available, value: 'available' },
-  { label: strings.status.played, value: 'played' },
-];
-
-const accessOptions: { label: string; value: GameAccess }[] = [
+const accessOptions: { label: string; value: GameAccess | null }[] = [
+  { label: strings.gameForm.accessNone, value: null },
   { label: strings.access.purchased, value: 'purchased' },
   { label: strings.access.friend, value: 'friend' },
   { label: strings.access.subscription, value: 'subscription' },
 ];
 
-const defaultAccess: GameAccess = 'purchased';
+const playedOptions: { label: string; value: boolean }[] = [
+  { label: strings.gameForm.playedNo, value: false },
+  { label: strings.gameForm.playedYes, value: true },
+];
 
 const platformOptions: { label: string; value: GamePlatform }[] = gamePlatforms.map(
   (platform) => ({ label: strings.platforms[platform], value: platform }),
@@ -55,15 +53,20 @@ const ratingOptions: { label: string; value: number | null }[] = [
   })),
 ];
 
-export function GameFormScreen({
-  game,
-  initialStatus,
-  onBack,
-  onSave,
-}: GameFormScreenProps) {
+// A new game starts out looking like the tab it was added from.
+function createDefaults(sourceTab: MainTab): { access: GameAccess | null; isPlayed: boolean } {
+  if (sourceTab === 'wishlist') {
+    return { access: null, isPlayed: false };
+  }
+
+  return { access: 'purchased', isPlayed: sourceTab === 'played' };
+}
+
+export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScreenProps) {
+  const defaults = createDefaults(sourceTab);
   const [name, setName] = useState(game?.name ?? '');
-  const [status, setStatus] = useState<GameStatus>(game?.status ?? initialStatus);
-  const [access, setAccess] = useState<GameAccess>(game?.access ?? defaultAccess);
+  const [access, setAccess] = useState<GameAccess | null>(game?.access ?? defaults.access);
+  const [isPlayed, setIsPlayed] = useState(game?.isPlayed ?? defaults.isPlayed);
   const [platform, setPlatform] = useState<GamePlatform>(
     game?.platform ?? defaultGamePlatform,
   );
@@ -79,13 +82,13 @@ export function GameFormScreen({
     }
 
     onSave({
-      access: status === 'wishlist' ? null : access,
+      access,
       id: game?.id ?? createId(),
+      isPlayed,
       name: trimmedName,
       note: note.trim(),
       platform,
-      rating: status === 'played' ? rating : null,
-      status,
+      rating: isPlayed ? rating : null,
     });
   }
 
@@ -113,24 +116,23 @@ export function GameFormScreen({
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>{strings.gameForm.statusLabel}</Text>
+          <Text style={styles.label}>{strings.gameForm.accessLabel}</Text>
+          <Text style={styles.hint}>{strings.gameForm.accessHint}</Text>
           <OptionChips
-            onSelect={setStatus}
-            options={statusOptions}
-            selectedValue={status}
+            onSelect={setAccess}
+            options={accessOptions}
+            selectedValue={access}
           />
         </View>
 
-        {status === 'wishlist' ? null : (
-          <View style={styles.field}>
-            <Text style={styles.label}>{strings.gameForm.accessLabel}</Text>
-            <OptionChips
-              onSelect={setAccess}
-              options={accessOptions}
-              selectedValue={access}
-            />
-          </View>
-        )}
+        <View style={styles.field}>
+          <Text style={styles.label}>{strings.gameForm.playedLabel}</Text>
+          <OptionChips
+            onSelect={setIsPlayed}
+            options={playedOptions}
+            selectedValue={isPlayed}
+          />
+        </View>
 
         {hasMultiplePlatforms() ? (
           <View style={styles.field}>
@@ -143,7 +145,7 @@ export function GameFormScreen({
           </View>
         ) : null}
 
-        {status === 'played' ? (
+        {isPlayed ? (
           <View style={styles.field}>
             <Text style={styles.label}>{strings.gameForm.ratingLabel}</Text>
             <Text style={styles.hint}>{strings.gameForm.ratingHint}</Text>

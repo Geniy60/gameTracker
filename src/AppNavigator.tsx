@@ -10,6 +10,7 @@ import { AppHeader } from './components/AppHeader';
 import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
 import { GamesScreen } from './features/games/GamesScreen';
+import { filterGamesByTab, findTabForGame } from './gameFilters';
 import type { RootStackParamList } from './navigationTypes';
 import { invalidateGameQueries, queryKeys } from './queryClient';
 import { deleteGame, loadGames, saveGame } from './services/gamesService';
@@ -122,20 +123,17 @@ function MainStack() {
             <AppHeader isRefreshing={isRefreshing} onRefresh={() => void refreshGames()} />
             <MainTabs activeTab={activeTab} onSelectTab={setActiveTab} />
             <GamesScreen
-              games={games.filter((game) => game.status === activeTab)}
+              games={filterGamesByTab(games, activeTab)}
               hasLoadError={gamesQuery.isError}
               isLoading={gamesQuery.isLoading}
               onAddGame={() =>
-                navigation.navigate('GameForm', {
-                  game: null,
-                  initialStatus: activeTab,
-                })
+                navigation.navigate('GameForm', { game: null, sourceTab: activeTab })
               }
               onDeleteGame={confirmDeleteGame}
               onEditGame={(game) =>
-                navigation.navigate('GameForm', { game, initialStatus: game.status })
+                navigation.navigate('GameForm', { game, sourceTab: activeTab })
               }
-              status={activeTab}
+              tab={activeTab}
             />
           </SafeAreaView>
         )}
@@ -144,16 +142,23 @@ function MainStack() {
         {({ navigation, route }) => (
           <GameFormScreen
             game={route.params.game}
-            initialStatus={route.params.initialStatus}
             onBack={() => navigation.goBack()}
             onSave={(game) => {
               void handleSaveGame(game).then((wasSaved) => {
-                if (wasSaved) {
-                  setActiveTab(game.status);
-                  navigation.goBack();
+                if (!wasSaved) {
+                  return;
                 }
+
+                // Saving can move a game out of the tab it was edited in.
+                // Follow it instead of returning to a list it no longer belongs to.
+                if (filterGamesByTab([game], activeTab).length === 0) {
+                  setActiveTab(findTabForGame(game));
+                }
+
+                navigation.goBack();
               });
             }}
+            sourceTab={route.params.sourceTab}
           />
         )}
       </Stack.Screen>

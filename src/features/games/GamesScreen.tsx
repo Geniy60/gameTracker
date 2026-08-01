@@ -13,7 +13,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { SearchInput } from '../../components/SearchInput';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
-import type { Game, GameStatus } from '../../types';
+import type { Game, MainTab } from '../../types';
 import { GameCard } from './GameCard';
 
 type GamesScreenProps = {
@@ -23,7 +23,7 @@ type GamesScreenProps = {
   onAddGame: () => void;
   onDeleteGame: (game: Game) => void;
   onEditGame: (game: Game) => void;
-  status: GameStatus;
+  tab: MainTab;
 };
 
 export function GamesScreen({
@@ -33,7 +33,7 @@ export function GamesScreen({
   onAddGame,
   onDeleteGame,
   onEditGame,
-  status,
+  tab,
 }: GamesScreenProps) {
   const [searchText, setSearchText] = useState('');
   const normalizedSearch = searchText.trim().toLowerCase();
@@ -75,8 +75,8 @@ export function GamesScreen({
           />
         ) : (
           <EmptyState
-            message={strings.empty[status].message}
-            title={strings.empty[status].title}
+            message={strings.empty[tab].message}
+            title={strings.empty[tab].title}
           />
         )
       ) : (
@@ -91,6 +91,7 @@ export function GamesScreen({
               key={game.id}
               onDelete={onDeleteGame}
               onPress={onEditGame}
+              tab={tab}
             />
           ))}
         </ScrollView>

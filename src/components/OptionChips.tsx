@@ -2,13 +2,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../theme/colors';
 
-type OptionChipsProps<T extends string | number | null> = {
+type OptionChipsProps<T extends string | number | boolean | null> = {
   onSelect: (value: T) => void;
   options: { label: string; value: T }[];
   selectedValue: T;
 };
 
-export function OptionChips<T extends string | number | null>({
+export function OptionChips<T extends string | number | boolean | null>({
   onSelect,
   options,
   selectedValue,

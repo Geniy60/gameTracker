@@ -13,6 +13,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { OptionChips } from '../../components/OptionChips';
 import { SecondaryScreenHeader } from '../../components/SecondaryScreenHeader';
 import { createId } from '../../createId';
+import {
+  defaultGamePlatform,
+  gamePlatforms,
+  hasMultiplePlatforms,
+} from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
 import type { Game, GamePlatform, GameStatus } from '../../types';
@@ -29,14 +34,9 @@ const statusOptions: { label: string; value: GameStatus }[] = [
   { label: strings.status.played, value: 'played' },
 ];
 
-const platformOptions: { label: string; value: GamePlatform }[] = [
-  { label: strings.platforms.pc, value: 'pc' },
-  { label: strings.platforms.playstation, value: 'playstation' },
-  { label: strings.platforms.xbox, value: 'xbox' },
-  { label: strings.platforms.switch, value: 'switch' },
-  { label: strings.platforms.mobile, value: 'mobile' },
-  { label: strings.platforms.other, value: 'other' },
-];
+const platformOptions: { label: string; value: GamePlatform }[] = gamePlatforms.map(
+  (platform) => ({ label: strings.platforms[platform], value: platform }),
+);
 
 const ratingOptions: { label: string; value: number | null }[] = [
   { label: strings.gameForm.ratingNotSet, value: null },
@@ -54,7 +54,9 @@ export function GameFormScreen({
 }: GameFormScreenProps) {
   const [name, setName] = useState(game?.name ?? '');
   const [status, setStatus] = useState<GameStatus>(game?.status ?? initialStatus);
-  const [platform, setPlatform] = useState<GamePlatform>(game?.platform ?? 'pc');
+  const [platform, setPlatform] = useState<GamePlatform>(
+    game?.platform ?? defaultGamePlatform,
+  );
   const [rating, setRating] = useState<number | null>(game?.rating ?? null);
   const [note, setNote] = useState(game?.note ?? '');
 
@@ -108,14 +110,16 @@ export function GameFormScreen({
           />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>{strings.gameForm.platformLabel}</Text>
-          <OptionChips
-            onSelect={setPlatform}
-            options={platformOptions}
-            selectedValue={platform}
-          />
-        </View>
+        {hasMultiplePlatforms() ? (
+          <View style={styles.field}>
+            <Text style={styles.label}>{strings.gameForm.platformLabel}</Text>
+            <OptionChips
+              onSelect={setPlatform}
+              options={platformOptions}
+              selectedValue={platform}
+            />
+          </View>
+        ) : null}
 
         {status === 'played' ? (
           <View style={styles.field}>

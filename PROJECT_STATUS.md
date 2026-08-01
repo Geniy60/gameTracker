@@ -21,6 +21,13 @@ The add/edit screen is one form with name, status, platform, rating, and note fi
 rating field is only shown for games with the `played` status, and the rating is cleared on
 save when the status is `wishlist`.
 
+PlayStation is currently the only platform. The available platforms are listed in
+`src/gamePlatforms.ts`, and both the form picker and the platform label on cards are hidden
+while that list has a single entry. Adding a platform means extending the `GamePlatform`
+union, `gamePlatforms`, and `strings.platforms`; the picker and the label come back on their
+own. The database check constraint already allows `pc`, `xbox`, `switch`, `mobile`, and
+`other`, so no migration is needed for that.
+
 Data is stored in the shared Supabase project that the sibling GymBro and Vacation apps use.
 The gameTracker tables use the `gametracker_` prefix. There is one table,
 `public.gametracker_games`, with database-level checks for status, platform, and rating
@@ -40,6 +47,19 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
+Narrowed the platform list to PlayStation only.
+
+Details:
+
+- `GamePlatform` is now a single-member union, and the available platforms live in
+  `src/gamePlatforms.ts`.
+- The form platform picker and the card platform label are hidden while only one platform
+  exists, so a card with no rating now shows no metadata line at all.
+- The table was empty, so no data migration was needed. The database check constraint was
+  left untouched on purpose.
+
+Previous step:
+
 Created the initial project and the first working MVP.
 
 Details:
@@ -49,7 +69,7 @@ Details:
   migration runner script from GymBro.
 - Added and applied `supabase/migrations/20260801120000_gametracker_initial_schema.sql`.
 - Verified anon REST access to `gametracker_games` returns 200.
-- `npx tsc --noEmit` passes.
+- Pushed the repository to GitHub with `main` as the default branch.
 
 ## Next Proposed Step
 

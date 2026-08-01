@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { hasMultiplePlatforms } from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
 import type { Game } from '../../types';
@@ -12,7 +13,11 @@ type GameCardProps = {
 };
 
 export function GameCard({ game, onDelete, onPress }: GameCardProps) {
-  const metaParts = [strings.platforms[game.platform]];
+  const metaParts: string[] = [];
+
+  if (hasMultiplePlatforms()) {
+    metaParts.push(strings.platforms[game.platform]);
+  }
 
   if (game.rating !== null) {
     metaParts.push(strings.list.ratingValue(game.rating));
@@ -27,9 +32,11 @@ export function GameCard({ game, onDelete, onPress }: GameCardProps) {
         <Text numberOfLines={1} style={styles.name}>
           {game.name}
         </Text>
-        <Text numberOfLines={1} style={styles.meta}>
-          {metaParts.join(' · ')}
-        </Text>
+        {metaParts.length > 0 ? (
+          <Text numberOfLines={1} style={styles.meta}>
+            {metaParts.join(' · ')}
+          </Text>
+        ) : null}
       </View>
       <Pressable
         accessibilityLabel={strings.accessibility.deleteGame}

@@ -50,12 +50,7 @@ export const strings = {
     played: 'Играл',
   } satisfies Record<GameStatus, string>,
   platforms: {
-    pc: 'PC',
     playstation: 'PlayStation',
-    xbox: 'Xbox',
-    switch: 'Switch',
-    mobile: 'Телефон',
-    other: 'Другое',
   } satisfies Record<GamePlatform, string>,
   accessibility: {
     addGame: 'Добавить игру',

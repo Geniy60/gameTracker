@@ -4,8 +4,7 @@ import type { Game } from '../types';
 export async function loadGames(): Promise<Game[]> {
   const { data, error } = await supabase
     .from('gametracker_games')
-    .select('id, name, access, is_played, platform, rating, note')
-    .order('name', { ascending: true });
+    .select('id, created_at, name, access, is_played, platform, rating, note');
 
   if (error) {
     throw error;
@@ -13,6 +12,7 @@ export async function loadGames(): Promise<Game[]> {
 
   return (data ?? []).map((row) => ({
     id: row.id,
+    createdAt: row.created_at,
     name: row.name,
     access: row.access,
     isPlayed: row.is_played,
@@ -22,6 +22,8 @@ export async function loadGames(): Promise<Game[]> {
   }));
 }
 
+// createdAt is deliberately not sent: the column default owns it on insert, and
+// leaving it out of the update keeps the original value on edit.
 export async function saveGame(game: Game): Promise<void> {
   const { error } = await supabase.from('gametracker_games').upsert({
     access: game.access,

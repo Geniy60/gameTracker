@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { filterGamesByTab, findTabForGame } from './gameFilters';
+import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilters';
 import type { Game } from './types';
 
 function createGame(overrides: Partial<Game>): Game {
   return {
     id: 'id',
+    createdAt: '2026-08-01T00:00:00Z',
     name: 'Game',
     access: null,
     isPlayed: false,
@@ -34,6 +35,36 @@ describe('filterGamesByTab', () => {
 
   it('keeps a played game in the played list after access is lost', () => {
     expect(filterGamesByTab(allGames, 'played')).toEqual([ownedPlayed, lostAccessPlayed]);
+  });
+});
+
+describe('selectGamesForTab', () => {
+  const older = createGame({ id: 'older', createdAt: '2026-01-01T00:00:00Z', name: 'A' });
+  const newer = createGame({ id: 'newer', createdAt: '2026-07-01T00:00:00Z', name: 'Z' });
+
+  it('puts the newest idea on top of the wishlist', () => {
+    expect(selectGamesForTab([older, newer], 'wishlist').map((game) => game.id)).toEqual([
+      'newer',
+      'older',
+    ]);
+  });
+
+  it('sorts the other tabs by name', () => {
+    const zebra = createGame({ id: 'zebra', access: 'purchased', name: 'Zebra' });
+    const apple = createGame({ id: 'apple', access: 'purchased', name: 'Apple' });
+
+    expect(selectGamesForTab([zebra, apple], 'available').map((game) => game.id)).toEqual([
+      'apple',
+      'zebra',
+    ]);
+  });
+
+  it('does not mutate the games it was given', () => {
+    const games = [newer, older];
+
+    selectGamesForTab(games, 'wishlist');
+
+    expect(games.map((game) => game.id)).toEqual(['newer', 'older']);
   });
 });
 

@@ -67,6 +67,8 @@ export const strings = {
     back: 'Назад',
     clearSearch: 'Очистить поиск',
     deleteGame: 'Удалить игру',
+    markOwned: 'Отметить, что игра появилась',
+    markPlayed: 'Отметить, что играл',
     refreshData: 'Обновить данные',
     search: 'Поиск',
   },

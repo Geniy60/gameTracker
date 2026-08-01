@@ -23,6 +23,7 @@ type GamesScreenProps = {
   onAddGame: () => void;
   onDeleteGame: (game: Game) => void;
   onEditGame: (game: Game) => void;
+  onQuickStep: (game: Game) => void;
   tab: MainTab;
 };
 
@@ -33,6 +34,7 @@ export function GamesScreen({
   onAddGame,
   onDeleteGame,
   onEditGame,
+  onQuickStep,
   tab,
 }: GamesScreenProps) {
   const [searchText, setSearchText] = useState('');
@@ -91,6 +93,7 @@ export function GamesScreen({
               key={game.id}
               onDelete={onDeleteGame}
               onPress={onEditGame}
+              onQuickStep={onQuickStep}
               tab={tab}
             />
           ))}
@@ -135,7 +138,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    gap: 10,
     paddingBottom: 24,
   },
   pressedButton: {

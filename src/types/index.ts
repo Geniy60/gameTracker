@@ -13,6 +13,8 @@ export type GamePlatform = 'playstation';
 
 export type Game = {
   id: string;
+  // Owned by the database. The app reads it for sorting but never writes it.
+  createdAt: string;
   name: string;
   access: GameAccess | null;
   isPlayed: boolean;

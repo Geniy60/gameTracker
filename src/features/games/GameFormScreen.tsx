@@ -83,6 +83,9 @@ export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScre
 
     onSave({
       access,
+      // The database owns createdAt; this value only keeps the object complete
+      // until the list refetches.
+      createdAt: game?.createdAt ?? new Date().toISOString(),
       id: game?.id ?? createId(),
       isPlayed,
       name: trimmedName,

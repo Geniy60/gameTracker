@@ -19,7 +19,7 @@ import { AppHeader } from './components/AppHeader';
 import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
 import { GamesScreen } from './features/games/GamesScreen';
-import { filterGamesByTab, findTabForGame } from './gameFilters';
+import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilters';
 import type { RootStackParamList } from './navigationTypes';
 import { invalidateGameQueries, queryKeys } from './queryClient';
 import { deleteGame, loadGames, saveGame } from './services/gamesService';
@@ -164,7 +164,7 @@ function MainStack() {
               {tabOrder.map((tab) => (
                 <View key={tab} style={{ width: pageWidth }}>
                   <GamesScreen
-                    games={filterGamesByTab(games, tab)}
+                    games={selectGamesForTab(games, tab)}
                     hasLoadError={gamesQuery.isError}
                     isLoading={gamesQuery.isLoading}
                     onAddGame={() =>
@@ -174,6 +174,7 @@ function MainStack() {
                     onEditGame={(game) =>
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
+                    onQuickStep={(game) => void handleSaveGame(game)}
                     tab={tab}
                   />
                 </View>

@@ -40,10 +40,20 @@ of its sections loads its own data; here every tab is a filter over one already 
 query, so lazy mounting would add code without saving work. One consequence is that each tab
 now keeps its own search text.
 
-Both tabs share the same screen component and show a search row, an add button, and a list
-of game cards. A card shows the game name plus platform and rating metadata. Tapping a card
-opens the edit screen; the trash button on the card deletes the game after a confirmation
-dialog.
+All tabs share the same screen component and show a search row, an add button, and a list of
+games. Rows are separated by a hairline rather than drawn as individual cards, so the list
+stays dense. Tapping a row opens the edit screen; the trash button deletes after a
+confirmation dialog.
+
+Each row can also carry one quick-step button, the single obvious next move for that game:
+a wanted game offers "bought it", an owned unplayed game offers "played it", and a game that
+is already played offers nothing. The logic lives in `src/gameActions.ts` and is unit
+tested. Using it makes the game leave the current tab, which is the intended feedback; the
+app does not jump tabs, since quick steps are meant to be used several in a row.
+
+Sorting depends on the tab. The wishlist is a queue, so it is newest first by `createdAt`.
+The other two are reference lists sorted by name. `createdAt` is owned by the database and
+never written by the app; an upsert on edit was verified to preserve it.
 
 The add/edit screen is one form with name, access, played, platform, rating, and note
 fields. Access and played are always editable, since they are what move a game between
@@ -82,6 +92,20 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Added quick-step buttons, per-tab sorting, and a denser list.
+
+Details:
+
+- Rows follow the sibling GymBro workout list: a top hairline instead of a card background,
+  border, radius, and gap.
+- `createQuickStep` derives the next move from the game itself rather than from the tab, so
+  the button is correct wherever the game is shown.
+- Added `createdAt` to the model for wishlist sorting. Verified against the database that
+  the upsert used on save leaves `created_at` untouched.
+- 13 unit tests pass.
+
+Previous step:
 
 Made the three tabs swipeable.
 

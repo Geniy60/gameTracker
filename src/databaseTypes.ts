@@ -1,4 +1,4 @@
-import type { GamePlatform, GameStatus } from './types';
+import type { GameAccess, GamePlatform, GameStatus } from './types';
 
 export type Json =
   | string
@@ -13,6 +13,7 @@ export type Database = {
     Tables: {
       gametracker_games: {
         Row: {
+          access: GameAccess | null;
           created_at: string;
           id: string;
           name: string;
@@ -23,6 +24,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          access?: GameAccess | null;
           id: string;
           name: string;
           note?: string;
@@ -31,6 +33,7 @@ export type Database = {
           status: GameStatus;
         };
         Update: {
+          access?: GameAccess | null;
           name?: string;
           note?: string;
           platform?: GamePlatform;

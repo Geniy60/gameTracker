@@ -20,7 +20,7 @@ import {
 } from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
-import type { Game, GamePlatform, GameStatus } from '../../types';
+import type { Game, GameAccess, GamePlatform, GameStatus } from '../../types';
 
 type GameFormScreenProps = {
   game: Game | null;
@@ -31,8 +31,17 @@ type GameFormScreenProps = {
 
 const statusOptions: { label: string; value: GameStatus }[] = [
   { label: strings.status.wishlist, value: 'wishlist' },
+  { label: strings.status.available, value: 'available' },
   { label: strings.status.played, value: 'played' },
 ];
+
+const accessOptions: { label: string; value: GameAccess }[] = [
+  { label: strings.access.purchased, value: 'purchased' },
+  { label: strings.access.friend, value: 'friend' },
+  { label: strings.access.subscription, value: 'subscription' },
+];
+
+const defaultAccess: GameAccess = 'purchased';
 
 const platformOptions: { label: string; value: GamePlatform }[] = gamePlatforms.map(
   (platform) => ({ label: strings.platforms[platform], value: platform }),
@@ -54,6 +63,7 @@ export function GameFormScreen({
 }: GameFormScreenProps) {
   const [name, setName] = useState(game?.name ?? '');
   const [status, setStatus] = useState<GameStatus>(game?.status ?? initialStatus);
+  const [access, setAccess] = useState<GameAccess>(game?.access ?? defaultAccess);
   const [platform, setPlatform] = useState<GamePlatform>(
     game?.platform ?? defaultGamePlatform,
   );
@@ -69,6 +79,7 @@ export function GameFormScreen({
     }
 
     onSave({
+      access: status === 'wishlist' ? null : access,
       id: game?.id ?? createId(),
       name: trimmedName,
       note: note.trim(),
@@ -109,6 +120,17 @@ export function GameFormScreen({
             selectedValue={status}
           />
         </View>
+
+        {status === 'wishlist' ? null : (
+          <View style={styles.field}>
+            <Text style={styles.label}>{strings.gameForm.accessLabel}</Text>
+            <OptionChips
+              onSelect={setAccess}
+              options={accessOptions}
+              selectedValue={access}
+            />
+          </View>
+        )}
 
         {hasMultiplePlatforms() ? (
           <View style={styles.field}>

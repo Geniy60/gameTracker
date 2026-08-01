@@ -19,6 +19,10 @@ export function GameCard({ game, onDelete, onPress }: GameCardProps) {
     metaParts.push(strings.platforms[game.platform]);
   }
 
+  if (game.access !== null) {
+    metaParts.push(strings.access[game.access]);
+  }
+
   if (game.rating !== null) {
     metaParts.push(strings.list.ratingValue(game.rating));
   }

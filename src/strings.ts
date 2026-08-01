@@ -1,13 +1,15 @@
-import type { GamePlatform, GameStatus } from './types';
+import type { GameAccess, GamePlatform, GameStatus } from './types';
 
 export const strings = {
   app: {
     title: 'GameTracker',
   },
+  // Short labels: three tabs share one row, so the full status names do not fit.
   tabs: {
-    wishlist: 'Хочу поиграть',
+    wishlist: 'Хочу',
+    available: 'Есть',
     played: 'Играл',
-  },
+  } satisfies Record<GameStatus, string>,
   search: {
     games: 'Поиск игры',
   },
@@ -15,6 +17,10 @@ export const strings = {
     wishlist: {
       title: 'Список желаний пуст',
       message: 'Нажми «+», чтобы добавить игру, в которую хочешь поиграть.',
+    },
+    available: {
+      title: 'Доступных игр пока нет',
+      message: 'Нажми «+», чтобы добавить игру, к которой есть доступ, но руки не дошли.',
     },
     played: {
       title: 'Пройденных игр пока нет',
@@ -38,6 +44,7 @@ export const strings = {
     nameLabel: 'Название',
     namePlaceholder: 'Например, Hollow Knight',
     statusLabel: 'Статус',
+    accessLabel: 'Доступ',
     platformLabel: 'Платформа',
     ratingLabel: 'Оценка',
     ratingHint: 'От 1 до 10, можно не ставить',
@@ -47,8 +54,14 @@ export const strings = {
   },
   status: {
     wishlist: 'Хочу поиграть',
+    available: 'Есть доступ',
     played: 'Играл',
   } satisfies Record<GameStatus, string>,
+  access: {
+    purchased: 'Куплено',
+    friend: 'Есть у друга',
+    subscription: 'В подписке',
+  } satisfies Record<GameAccess, string>,
   platforms: {
     playstation: 'PlayStation',
   } satisfies Record<GamePlatform, string>,

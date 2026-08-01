@@ -7,19 +7,31 @@ personal video game lists.
 
 The app uses a single dark palette. There is no theme switcher and no settings screen yet.
 
-The app shell has a compact header with a manual refresh action and two main tabs:
+The app shell has a compact header with a manual refresh action and three main tabs, which
+are one lifecycle rather than independent lists:
 
-- Wishlist (games the user wants to play)
-- Played (games the user has played)
+- Wishlist (wanted, no access yet)
+- Available (the user can play it but has not)
+- Played
+
+Tab labels are deliberately short because three tabs share one row.
 
 Both tabs share the same screen component and show a search row, an add button, and a list
 of game cards. A card shows the game name plus platform and rating metadata. Tapping a card
 opens the edit screen; the trash button on the card deletes the game after a confirmation
 dialog.
 
-The add/edit screen is one form with name, status, platform, rating, and note fields. The
-rating field is only shown for games with the `played` status, and the rating is cleared on
-save when the status is `wishlist`.
+The add/edit screen is one form with name, status, access, platform, rating, and note fields.
+
+Two fields are conditional, and both are cleared on save when they do not apply:
+
+- Rating is shown only for the `played` status.
+- Access (`purchased`, `friend`, `subscription`) is hidden for `wishlist`, because a wanted
+  game is by definition one the user cannot reach yet. It stays visible for `played` so the
+  user can still see that a finished game came from a subscription.
+
+The database enforces both rules with check constraints, so the app and the schema cannot
+drift apart.
 
 PlayStation is currently the only platform. The available platforms are listed in
 `src/gamePlatforms.ts`, and both the form picker and the platform label on cards are hidden
@@ -46,6 +58,20 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Added the third status and the access field.
+
+Details:
+
+- Applied `supabase/migrations/20260801170000_gametracker_game_access.sql`: widened the
+  status check to allow `available`, added the nullable `access` column with its own value
+  check, and added a check forbidding access on wishlist rows.
+- Verified through the REST API that an `available` row with `subscription` access inserts
+  and that a `wishlist` row carrying access is rejected. Both test rows were removed.
+- The two subscription variants the user first described were merged into one `subscription`
+  value after discussion; the distinction was not needed in practice.
+
+Previous step:
 
 Narrowed the platform list to PlayStation only.
 
@@ -78,8 +104,8 @@ delete a game, and confirm the data survives an app restart.
 
 ## Important Decisions And Open Questions
 
-- Two statuses only (`wishlist`, `played`). A "playing now" status was discussed and
-  deliberately deferred.
+- Three statuses (`wishlist`, `available`, `played`). A "playing now" status was discussed
+  and deliberately deferred.
 - Dark theme only. A light theme was deliberately deferred.
 - No per-user scoping. The app is single user, unlike GymBro which has a user selector.
 - Open question: the GitHub repository visibility is unknown. Real Supabase keys are kept

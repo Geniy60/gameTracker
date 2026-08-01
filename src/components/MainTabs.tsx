@@ -24,6 +24,11 @@ const tabs: TabConfig[] = [
     label: strings.tabs.wishlist,
   },
   {
+    iconName: 'library-outline',
+    key: 'available',
+    label: strings.tabs.available,
+  },
+  {
     iconName: 'game-controller-outline',
     key: 'played',
     label: strings.tabs.played,

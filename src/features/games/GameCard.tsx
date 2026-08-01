@@ -115,7 +115,7 @@ export function GameCard({
 
 const styles = StyleSheet.create({
   // Rows are separated by a hairline instead of being individual cards, so the list
-  // stays dense. The first row drops its line because the scroller already draws one.
+  // stays dense. The first row drops its line because the panel already has a border.
   row: {
     alignItems: 'center',
     borderTopColor: colors.border,
@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     minHeight: 56,
+    paddingHorizontal: 12,
     paddingVertical: 8,
   },
   firstRow: {
@@ -150,9 +151,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 6,
   },
+  // Darker than the row it sits on, so the buttons read as recessed rather than
+  // disappearing into the list panel.
   actionButton: {
     alignItems: 'center',
-    backgroundColor: colors.subtleBackground,
+    backgroundColor: colors.panel,
     borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,

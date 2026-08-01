@@ -135,17 +135,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
   },
-  // The border sits on the scroller itself, so it stays put while rows slide under it.
+  // One bounded panel instead of separate cards. The border and background sit on the
+  // scroller, so they stay fixed on all four sides while the rows slide inside it.
   list: {
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
+    backgroundColor: colors.subtleBackground,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
     flex: 1,
-    marginTop: 2,
+    overflow: 'hidden',
   },
   listContent: {
     flexGrow: 1,
-    paddingBottom: 24,
-    paddingTop: 10,
+    paddingBottom: 8,
   },
   pressedButton: {
     opacity: 0.7,

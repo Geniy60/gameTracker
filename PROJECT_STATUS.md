@@ -30,6 +30,16 @@ explicit decision, not an accident of the filter.
 
 Tab labels are deliberately short because three tabs share one row.
 
+The three tabs live in a horizontal paging `ScrollView`, so they can be swiped between as
+well as tapped, following the sibling Fridge app. Tapping a tab scrolls the pager without
+animation; swiping updates the active tab from the scroll offset. The pager is never
+scrolled programmatically during a drag, which would fight the gesture.
+
+Unlike Fridge, all three pages are mounted at once. Fridge mounts pages lazily because each
+of its sections loads its own data; here every tab is a filter over one already loaded
+query, so lazy mounting would add code without saving work. One consequence is that each tab
+now keeps its own search text.
+
 Both tabs share the same screen component and show a search row, an add button, and a list
 of game cards. A card shows the game name plus platform and rating metadata. Tapping a card
 opens the edit screen; the trash button on the card deletes the game after a confirmation
@@ -72,6 +82,18 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Made the three tabs swipeable.
+
+Details:
+
+- Ported the paging `ScrollView` approach from the sibling Fridge app.
+- `openTab` is used everywhere the tab changes programmatically, including the jump that
+  follows a game to its new tab after a save, so the pager and the tab row cannot disagree.
+- Skipped Fridge's lazy page mounting: it exists there because each section fetches its own
+  data, which is not the case here.
+
+Previous step:
 
 Replaced the native dialogs with an in-app dark one.
 

@@ -2,8 +2,15 @@ import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { showAppAlert } from './appAlert';
@@ -22,6 +29,8 @@ import type { Game, MainTab } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const MIN_REFRESH_FEEDBACK_MS = 600;
+// Left to right order of the swipe pager. Must match the tab row.
+const tabOrder: MainTab[] = ['wishlist', 'available', 'played'];
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -53,8 +62,25 @@ function MainStack() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<MainTab>('wishlist');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { width: pageWidth } = useWindowDimensions();
+  const pagerRef = useRef<ScrollView>(null);
   const gamesQuery = useQuery({ queryKey: queryKeys.games, queryFn: loadGames });
   const games = gamesQuery.data ?? [];
+
+  // Tapping a tab jumps the pager. Swiping does the reverse through handlePagerScroll,
+  // so the pager is never scrolled programmatically while a drag is in progress.
+  function openTab(tab: MainTab) {
+    setActiveTab(tab);
+    pagerRef.current?.scrollTo({ animated: false, x: tabOrder.indexOf(tab) * pageWidth });
+  }
+
+  function handlePagerScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    const nextTab = tabOrder[Math.round(event.nativeEvent.contentOffset.x / pageWidth)];
+
+    if (nextTab !== undefined && nextTab !== activeTab) {
+      setActiveTab(nextTab);
+    }
+  }
 
   useEffect(() => {
     if (gamesQuery.isError) {
@@ -124,20 +150,35 @@ function MainStack() {
         {({ navigation }) => (
           <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safeArea}>
             <AppHeader isRefreshing={isRefreshing} onRefresh={() => void refreshGames()} />
-            <MainTabs activeTab={activeTab} onSelectTab={setActiveTab} />
-            <GamesScreen
-              games={filterGamesByTab(games, activeTab)}
-              hasLoadError={gamesQuery.isError}
-              isLoading={gamesQuery.isLoading}
-              onAddGame={() =>
-                navigation.navigate('GameForm', { game: null, sourceTab: activeTab })
-              }
-              onDeleteGame={confirmDeleteGame}
-              onEditGame={(game) =>
-                navigation.navigate('GameForm', { game, sourceTab: activeTab })
-              }
-              tab={activeTab}
-            />
+            <MainTabs activeTab={activeTab} onSelectTab={openTab} />
+            <ScrollView
+              horizontal
+              onMomentumScrollEnd={handlePagerScroll}
+              onScroll={handlePagerScroll}
+              pagingEnabled
+              ref={pagerRef}
+              scrollEventThrottle={16}
+              showsHorizontalScrollIndicator={false}
+              style={styles.pager}
+            >
+              {tabOrder.map((tab) => (
+                <View key={tab} style={{ width: pageWidth }}>
+                  <GamesScreen
+                    games={filterGamesByTab(games, tab)}
+                    hasLoadError={gamesQuery.isError}
+                    isLoading={gamesQuery.isLoading}
+                    onAddGame={() =>
+                      navigation.navigate('GameForm', { game: null, sourceTab: tab })
+                    }
+                    onDeleteGame={confirmDeleteGame}
+                    onEditGame={(game) =>
+                      navigation.navigate('GameForm', { game, sourceTab: tab })
+                    }
+                    tab={tab}
+                  />
+                </View>
+              ))}
+            </ScrollView>
           </SafeAreaView>
         )}
       </Stack.Screen>
@@ -155,7 +196,7 @@ function MainStack() {
                 // Saving can move a game out of the tab it was edited in.
                 // Follow it instead of returning to a list it no longer belongs to.
                 if (filterGamesByTab([game], activeTab).length === 0) {
-                  setActiveTab(findTabForGame(game));
+                  openTab(findTabForGame(game));
                 }
 
                 navigation.goBack();
@@ -172,6 +213,9 @@ function MainStack() {
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: colors.appBackground,
+    flex: 1,
+  },
+  pager: {
     flex: 1,
   },
 });

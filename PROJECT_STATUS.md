@@ -71,6 +71,20 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
+Pointed the `platform` column default at `playstation`.
+
+Details:
+
+- The default was still `other`, left over from the original six platform list. A row
+  inserted without an explicit platform would have been typed as `playstation` by the app
+  while actually holding `other`.
+- Applied `supabase/migrations/20260801210000_gametracker_platform_default.sql` and verified
+  that an insert without a platform now yields `playstation`. The test row was removed.
+- The check constraint still allows all six values, so adding a platform back needs no
+  migration.
+
+Previous step:
+
 Replaced the single status column with independent access and played fields.
 
 Details:

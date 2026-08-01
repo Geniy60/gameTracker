@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { showAppAlert } from '../../appAlert';
 import { OptionChips } from '../../components/OptionChips';
 import { SecondaryScreenHeader } from '../../components/SecondaryScreenHeader';
 import { createId } from '../../createId';
@@ -77,7 +77,7 @@ export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScre
     const trimmedName = name.trim();
 
     if (trimmedName.length === 0) {
-      Alert.alert(strings.alerts.emptyNameTitle, strings.alerts.emptyNameMessage);
+      showAppAlert(strings.alerts.emptyNameTitle, strings.alerts.emptyNameMessage);
       return;
     }
 

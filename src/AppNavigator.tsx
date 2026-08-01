@@ -3,9 +3,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
+import { showAppAlert } from './appAlert';
+import { AppAlertHost } from './components/AppAlertHost';
 import { AppHeader } from './components/AppHeader';
 import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
@@ -42,6 +44,7 @@ export function AppNavigator() {
       <NavigationContainer theme={navigationTheme}>
         <MainStack />
       </NavigationContainer>
+      <AppAlertHost />
     </SafeAreaProvider>
   );
 }
@@ -55,7 +58,7 @@ function MainStack() {
 
   useEffect(() => {
     if (gamesQuery.isError) {
-      Alert.alert(strings.alerts.loadTitle, strings.alerts.loadMessage);
+      showAppAlert(strings.alerts.loadTitle, strings.alerts.loadMessage);
     }
   }, [gamesQuery.isError]);
 
@@ -83,13 +86,13 @@ function MainStack() {
       await invalidateGameQueries(queryClient);
       return true;
     } catch {
-      Alert.alert(strings.alerts.saveTitle, strings.alerts.saveMessage);
+      showAppAlert(strings.alerts.saveTitle, strings.alerts.saveMessage);
       return false;
     }
   }
 
   function confirmDeleteGame(game: Game) {
-    Alert.alert(
+    showAppAlert(
       strings.alerts.deleteGameTitle,
       strings.alerts.deleteGameMessage(game.name),
       [
@@ -101,7 +104,7 @@ function MainStack() {
             void deleteGame(game.id)
               .then(() => invalidateGameQueries(queryClient))
               .catch(() =>
-                Alert.alert(strings.alerts.saveTitle, strings.alerts.saveMessage),
+                showAppAlert(strings.alerts.saveTitle, strings.alerts.saveMessage),
               );
           },
         },

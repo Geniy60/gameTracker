@@ -6,6 +6,8 @@ The project is a minimal Expo SDK 54 / React Native / TypeScript Android app for
 personal video game lists.
 
 The app uses a single dark palette. There is no theme switcher and no settings screen yet.
+Confirmation and error dialogs are rendered in-app rather than by the OS, so they follow the
+dark palette too.
 
 A game has two independent properties rather than one status:
 
@@ -70,6 +72,22 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Replaced the native dialogs with an in-app dark one.
+
+Details:
+
+- Added `src/appAlert.ts` and `src/components/AppAlertHost.tsx`, ported from the sibling
+  GymBro app and simplified for a single palette.
+- `showAppAlert` replaces every `Alert.alert` call. The native dialog stays only as a
+  fallback for the window before the host mounts, where dropping a message would be worse
+  than showing a light one.
+- The host is mounted once in `AppNavigator`, outside `NavigationContainer`, so dialogs sit
+  above every screen.
+- The hardware back button dismisses the dialog through its cancel button, so it can never
+  trigger a destructive action.
+
+Previous step:
 
 Pointed the `platform` column default at `playstation`.
 

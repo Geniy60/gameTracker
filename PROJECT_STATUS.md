@@ -87,3 +87,10 @@ delete a game, and confirm the data survives an app restart.
 - Open question: app icon and splash assets are not created yet.
 - Suggested but not implemented: autocomplete of game titles and cover art from an external
   game database such as RAWG or IGDB. This would add an API key and network dependency.
+- Deferred on purpose: importing played games from the PlayStation Network. Sony has no
+  official public API, but the undocumented one used by the PlayStation app is reachable
+  through the `psn-api` library. The agreed shape was a local Node script under `scripts/`
+  reading an NPSSO token from the environment and inserting rows with the `played` status,
+  so the token never reaches the phone or the repository. Known limits: only games that have
+  a trophy list are returned, and PS4 and PS5 versions of one game are separate entries.
+  Revisit after the app itself is finished.

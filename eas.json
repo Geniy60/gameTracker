@@ -1,0 +1,15 @@
+{
+  "cli": {
+    "version": ">= 20.1.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "apk": {
+      "distribution": "internal",
+      "environment": "production",
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}

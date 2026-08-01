@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "GameTracker",
+    "owner": "geniy60",
+    "slug": "gametracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.evgeniy.gametracker",
+      "versionCode": 1,
+      "predictiveBackGestureEnabled": false
+    }
+  }
+}

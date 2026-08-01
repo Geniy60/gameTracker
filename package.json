@@ -1,0 +1,40 @@
+{
+  "name": "gametracker",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.3",
+    "@react-navigation/native": "^7.3.8",
+    "@react-navigation/stack": "^7.10.11",
+    "@supabase/supabase-js": "^2.108.2",
+    "@tanstack/react-query": "^5.101.1",
+    "expo": "~54.0.36",
+    "expo-crypto": "~15.0.9",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0"
+  },
+  "devDependencies": {
+    "@expo/ngrok": "^4.1.3",
+    "@types/react": "~19.1.0",
+    "pg": "^8.22.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.9"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "build:apk": "npx eas-cli build --platform android --profile apk",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "db:apply": "node scripts/applyMigration.mjs",
+    "db:apply:latest": "node scripts/applyMigration.mjs latest",
+    "test": "npm run typecheck && npm run test:unit",
+    "test:unit": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "private": true
+}

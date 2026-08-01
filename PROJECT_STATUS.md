@@ -45,6 +45,11 @@ games. Rows are separated by a hairline rather than drawn as individual cards, s
 stays dense. Tapping a row opens the edit screen; the trash button deletes after a
 confirmation dialog.
 
+The list border follows GymBro and has two parts. The scroller itself carries a top border,
+which stays fixed while rows slide under it, and each row carries its own top border except
+the first, which would otherwise double up with the scroller's. Putting the whole border on
+the rows alone leaves the list looking unbounded while scrolling.
+
 Each row can also carry one quick-step button, the single obvious next move for that game:
 a wanted game offers "bought it", an owned unplayed game offers "played it", and a game that
 is already played offers nothing. The logic lives in `src/gameActions.ts` and is unit
@@ -98,7 +103,7 @@ Added quick-step buttons, per-tab sorting, and a denser list.
 Details:
 
 - Rows follow the sibling GymBro workout list: a top hairline instead of a card background,
-  border, radius, and gap.
+  border, radius, and gap, plus a fixed top border on the scroller.
 - `createQuickStep` derives the next move from the game itself rather than from the tab, so
   the button is correct wherever the game is shown.
 - Added `createdAt` to the model for wishlist sorting. Verified against the database that

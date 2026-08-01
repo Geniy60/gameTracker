@@ -87,9 +87,10 @@ export function GamesScreen({
           keyboardShouldPersistTaps="handled"
           style={styles.list}
         >
-          {visibleGames.map((game) => (
+          {visibleGames.map((game, index) => (
             <GameCard
               game={game}
+              isFirst={index === 0}
               key={game.id}
               onDelete={onDeleteGame}
               onPress={onEditGame}
@@ -134,11 +135,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
   },
+  // The border sits on the scroller itself, so it stays put while rows slide under it.
   list: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
     flex: 1,
+    marginTop: 2,
   },
   listContent: {
+    flexGrow: 1,
     paddingBottom: 24,
+    paddingTop: 10,
   },
   pressedButton: {
     opacity: 0.7,

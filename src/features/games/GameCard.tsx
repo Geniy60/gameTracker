@@ -10,6 +10,7 @@ import type { Game, MainTab } from '../../types';
 
 type GameCardProps = {
   game: Game;
+  isFirst: boolean;
   onDelete: (game: Game) => void;
   onPress: (game: Game) => void;
   onQuickStep: (game: Game) => void;
@@ -49,6 +50,7 @@ function createMetaParts(game: Game, tab: MainTab): string[] {
 
 export function GameCard({
   game,
+  isFirst,
   onDelete,
   onPress,
   onQuickStep,
@@ -60,7 +62,11 @@ export function GameCard({
   return (
     <Pressable
       onPress={() => onPress(game)}
-      style={({ pressed }) => [styles.row, pressed && styles.pressedRow]}
+      style={({ pressed }) => [
+        styles.row,
+        isFirst && styles.firstRow,
+        pressed && styles.pressedRow,
+      ]}
     >
       <View style={styles.info}>
         <Text numberOfLines={1} style={styles.name}>
@@ -108,8 +114,8 @@ export function GameCard({
 }
 
 const styles = StyleSheet.create({
-  // Rows are separated by a hairline instead of being individual cards, so the
-  // list stays dense. The top border also separates the first row from the toolbar.
+  // Rows are separated by a hairline instead of being individual cards, so the list
+  // stays dense. The first row drops its line because the scroller already draws one.
   row: {
     alignItems: 'center',
     borderTopColor: colors.border,
@@ -118,6 +124,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 56,
     paddingVertical: 8,
+  },
+  firstRow: {
+    borderTopWidth: 0,
   },
   pressedRow: {
     opacity: 0.6,

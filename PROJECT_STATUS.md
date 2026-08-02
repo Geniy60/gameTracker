@@ -89,6 +89,13 @@ candidates. That was deliberately not built until it turns out to be needed.
 is embedded in the app bundle. That is an accepted trade-off for skipping a local script: the
 key is read only, so the worst case is a stranger spending the quota.
 
+`.env.local` is ignored by git, so it is not part of what EAS uploads. Every `EXPO_PUBLIC_`
+value is inlined at bundle time, which was confirmed by finding all three of them in an
+exported bundle. A cloud build therefore needs the same three variables defined in the EAS
+`production` environment, which is the one the `apk` profile names. Without them the app
+throws from `supabaseClient.ts` the moment it starts. `SUPABASE_DATABASE_URL` must not be
+uploaded: it carries the database password and only local migration scripts use it.
+
 The list styling follows GymBro's tile lists and is two separate things that must not be
 merged. The scroller carries only a fixed top line, which rows slide under while scrolling.
 Every row carries its own background, border and rounded corners, so a list holding one game

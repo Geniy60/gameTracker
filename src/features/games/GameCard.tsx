@@ -86,10 +86,12 @@ function createAccessTag(game: Game): GameTag {
     };
   }
 
+  // The PlayStation logo rather than a generic recurring arrow: the only subscription
+  // this app will ever mean is PS Plus, and it is recognised instantly.
   if (game.access === 'subscription') {
     return {
       color: colors.positive,
-      icon: 'repeat-outline',
+      icon: 'logo-playstation',
       label: strings.access.subscription,
     };
   }

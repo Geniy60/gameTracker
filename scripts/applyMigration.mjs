@@ -1,9 +1,9 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Client } from 'pg';
+import { loadEnvFiles } from './loadEnv.mjs';
 
-await loadEnvFile('.env.local');
-await loadEnvFile('.env');
+await loadEnvFiles();
 
 const requestedMigrationPath = process.argv[2];
 const migrationPath =
@@ -40,53 +40,6 @@ try {
   throw error;
 } finally {
   await client.end();
-}
-
-async function loadEnvFile(envPath) {
-  let contents;
-
-  try {
-    contents = await readFile(envPath, 'utf8');
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return;
-    }
-
-    throw error;
-  }
-
-  for (const rawLine of contents.split(/\r?\n/)) {
-    const line = rawLine.trim();
-
-    if (!line || line.startsWith('#')) {
-      continue;
-    }
-
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
-
-    if (!match) {
-      continue;
-    }
-
-    const [, key, rawValue] = match;
-
-    if (process.env[key] !== undefined) {
-      continue;
-    }
-
-    process.env[key] = unquoteEnvValue(rawValue.trim());
-  }
-}
-
-function unquoteEnvValue(value) {
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    return value.slice(1, -1);
-  }
-
-  return value;
 }
 
 async function getLatestMigrationPath() {

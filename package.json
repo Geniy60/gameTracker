@@ -27,6 +27,7 @@
     "@types/react": "~19.1.0",
     "babel-preset-expo": "~54.0.10",
     "pg": "^8.22.0",
+    "psn-api": "^2.18.0",
     "typescript": "~5.9.2",
     "vitest": "^4.1.9"
   },
@@ -36,6 +37,7 @@
     "build:apk": "npx eas-cli build --platform android --profile apk",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "import:psn": "node scripts/importPsnGames.mjs",
     "db:apply": "node scripts/applyMigration.mjs",
     "db:apply:latest": "node scripts/applyMigration.mjs latest",
     "test": "npm run typecheck && npm run test:unit",

@@ -199,6 +199,33 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Added the PlayStation Network import script. Written but not run yet.
+
+Details:
+
+- `scripts/importPsnGames.mjs` reads the trophy list through `psn-api`, a dev
+  dependency, and inserts the games that are missing. `PSN_NPSSO` is read from
+  `.env.local` and documented in `.env.example`. It never reaches the phone or git.
+- The script is idempotent: it compares against the names already in the table and
+  inserts only what is new, so it is safe to run again. `--dry-run` prints the list
+  without writing and `--limit N` takes only the first N, which is how the first run
+  was meant to be made.
+- Name matching ignores case, trademark marks and repeated spaces, nothing more.
+  Merging PS4 and PS5 entries needs that much; anything cleverer would also merge a
+  remaster with the original, and a duplicate row is easier to fix by hand than a
+  game that never arrived.
+- Imported games get `access = 'purchased'`, since that is what the played tab's own
+  add button uses. A trophy list does not say how the game was obtained, so this is a
+  default to correct, not a fact.
+- Hidden titles are skipped. Titles with no trophies earned are kept: a game appears
+  in the list once it has been launched, which is exactly what the played tab means.
+- Imported rows have no cover. Covers are only looked up after a save from the form,
+  so filling them needs a second script, which is the next step.
+- The dotenv reader moved from `applyMigration.mjs` into `scripts/loadEnv.mjs`, since
+  both scripts need it now.
+
+Previous step:
+
 Linked the project to EAS and submitted the first cloud APK build.
 
 Details:
@@ -435,13 +462,14 @@ Details:
 
 ## Next Proposed Step
 
-Install the finished APK on the phone and check that the app starts without the development
-tunnel, that the icon and splash are the drawn ones, and that Supabase and SteamGridDB answer
-with the keys taken from the EAS `production` environment rather than from `.env.local`.
+Run the import, first with `--dry-run`, then with `--limit 10` to see what real rows look
+like, and only then in full.
 
-Proposed after that: the PlayStation Network import script described at the bottom of this
-file. The played tab is a reference list that is currently typed in by hand, which is exactly
-the work a script should do.
+After that, a second script to fill the covers of rows where `cover_url` is null. It has to
+be separate: at a few hundred games that is around twice as many requests to SteamGridDB, and
+a failure in the middle of those must not leave the import half done. It should go one
+request at a time with a pause, and stop on 429 or 403 rather than retry. Being restricted to
+empty covers makes it resumable, so stopping costs nothing.
 
 Open afterwards:
 
@@ -462,10 +490,7 @@ Open afterwards:
   out of git as a precaution.
 - Suggested but not implemented: autocomplete of game titles and cover art from an external
   game database such as RAWG or IGDB. This would add an API key and network dependency.
-- Deferred on purpose: importing played games from the PlayStation Network. Sony has no
-  official public API, but the undocumented one used by the PlayStation app is reachable
-  through the `psn-api` library. The agreed shape was a local Node script under `scripts/`
-  reading an NPSSO token from the environment and inserting rows with the `played` status,
-  so the token never reaches the phone or the repository. Known limits: only games that have
-  a trophy list are returned, and PS4 and PS5 versions of one game are separate entries.
-  Revisit after the app itself is finished.
+- The PSN import stays a local script and is run by hand. Sony's API is undocumented and
+  carries no obligation to us, so the account is worth treating carefully: no schedule, no
+  loop, and no retry after a refusal. Known limit: only games with a trophy list come back,
+  so a game without one still has to be added by hand.

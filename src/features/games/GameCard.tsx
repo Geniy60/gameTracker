@@ -180,7 +180,7 @@ export function GameCard({
         ))}
         {/* Pushed to the bottom of the column so the marks sit on one line along the
             foot of the card, whatever the text above them takes up. */}
-        <View style={styles.tags}>
+        <View style={styles.footer}>
           {tags.map((tag) => (
             <View
               accessibilityLabel={tag.label}
@@ -196,19 +196,24 @@ export function GameCard({
               ) : null}
             </View>
           ))}
+          {/* One button rather than a stack of them. Every row action is rare enough
+              to live a tap away, and three accent frames beside every cover made a
+              list of 74 games read as a control panel instead of a shelf.
+              It sits at the end of the marks rather than beside the text, where its
+              width was taken from the game name for the whole height of the row. */}
+          <Pressable
+            accessibilityLabel={strings.accessibility.rowActions}
+            hitSlop={6}
+            onPress={() => onOpenActions(game)}
+            style={({ pressed }) => [
+              styles.actionButton,
+              pressed && styles.pressedButton,
+            ]}
+          >
+            <Ionicons color={colors.primary} name="ellipsis-horizontal" size={21} />
+          </Pressable>
         </View>
       </View>
-      {/* One button rather than a stack of them. Every row action is rare enough to
-          live a tap away, and three accent frames beside every cover made a list of
-          74 games read as a control panel instead of a shelf. */}
-      <Pressable
-        accessibilityLabel={strings.accessibility.rowActions}
-        hitSlop={6}
-        onPress={() => onOpenActions(game)}
-        style={({ pressed }) => [styles.actionButton, pressed && styles.pressedButton]}
-      >
-        <Ionicons color={colors.primary} name="ellipsis-horizontal" size={21} />
-      </Pressable>
     </Pressable>
   );
 }
@@ -266,7 +271,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  tags: {
+  // The marks and the action button on one line along the bottom of the column.
+  footer: {
+    alignItems: 'center',
     flexDirection: 'row',
     gap: 6,
     marginTop: 'auto',
@@ -302,6 +309,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 40,
     justifyContent: 'center',
+    // Pushed to the right edge, so the marks stay grouped on the left.
+    marginLeft: 'auto',
     width: 40,
   },
   pressedButton: {

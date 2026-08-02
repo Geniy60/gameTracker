@@ -82,8 +82,8 @@ appear together: a rated game has been played, and the dollar only marks a wishl
 Each icon carries its Russian label for the screen reader, which cannot
 see it. The note is above them all, being the only free text. The cover is deliberately large: the wishlist is meant
 to read as a shelf of games rather than a dense table, which is worth the taller rows. Row
-content is top aligned and the action buttons stack in a column on the right, because a short
-block of text centred beside a tall cover reads as unfinished. Covers are drawn with `expo-image` rather than the React Native
+content is top aligned, because a short block of text centred beside a tall cover reads as
+unfinished. Covers are drawn with `expo-image` rather than the React Native
 `Image`, because it keeps its own disk cache and scrolling the list must not refetch
 anything. A game without a cover shows a placeholder, which keeps row heights even.
 
@@ -136,7 +136,8 @@ Rows use `subtleBackground`; `panel` and `surface` both sit too close to the app
 to read as separate elements. Row action buttons use the darker `panel` so they stay visible
 against the row.
 
-Every row carries one button, an ellipsis, which opens a menu of that game's actions:
+Every row carries one button, an ellipsis at the right end of the marks row, which opens a
+menu of that game's actions:
 `В начало очереди` on the wishlist only, then `Доступ`, `Прогресс` and `Удалить`. Access and
 progress open a second dialog with their own choices, which the alert host handles by
 swapping its contents rather than stacking a modal.
@@ -233,6 +234,22 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Moved the row action button down into the marks row.
+
+Details:
+
+- It used to sit beside the text column, so its 40 points of width were taken from
+  the game name for the whole height of the row. Centring it vertically, which was
+  what was first asked for, would not have changed that: a sibling of the text column
+  occupies its width wherever it sits in it.
+- At the end of the marks row instead, pushed right with `marginLeft: 'auto'`. The
+  name now runs the full width of the card, and most titles stop wrapping.
+- Nothing distinguishes it from the marks beside it but the accent frame, which is
+  the same rule that was already there: marks stay plain so they are not taken for
+  something tappable.
+
+Previous step:
 
 Added tab counters, a random game roll, and a rating mark on the card.
 

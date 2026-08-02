@@ -69,7 +69,7 @@ export function GameCard({
     >
       {game.coverUrl === null ? (
         <View style={[styles.cover, styles.coverPlaceholder]}>
-          <Ionicons color={colors.muted} name="game-controller-outline" size={22} />
+          <Ionicons color={colors.muted} name="game-controller-outline" size={34} />
         </View>
       ) : (
         // expo-image keeps the picture in its own disk cache, so scrolling the list
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'space-between',
     marginBottom: 8,
-    minHeight: 82,
+    minHeight: 148,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
@@ -142,11 +142,13 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   // 2:3, matching the 600x900 box art SteamGridDB returns, so nothing is cropped.
+  // At this size a three times density screen asks for about 264x396 pixels, which
+  // is what the stored thumbnail holds, so it still does not need the full picture.
   cover: {
     backgroundColor: colors.panel,
     borderRadius: 6,
-    height: 66,
-    width: 44,
+    height: 132,
+    width: 88,
   },
   coverPlaceholder: {
     alignItems: 'center',

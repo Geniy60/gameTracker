@@ -43,8 +43,9 @@ All tabs share the same screen component and show a search row, an add button, a
 games. Tapping a row opens the edit screen; the trash button deletes after a confirmation
 dialog.
 
-Every row starts with a cover picture on the left, followed by a column holding the name and
-one line per property. Covers are drawn with `expo-image` rather than the React Native
+Every row starts with an 88x132 cover picture on the left, followed by a column holding the
+name and one line per property. The cover is deliberately large: the wishlist is meant to
+read as a shelf of games rather than a dense table, which is worth the taller rows. Covers are drawn with `expo-image` rather than the React Native
 `Image`, because it keeps its own disk cache and scrolling the list must not refetch
 anything. A game without a cover shows a placeholder, which keeps row heights even.
 
@@ -58,8 +59,10 @@ The lookup is two requests: the game id by name, then one cover filtered to
 `dimensions=600x900&types=static&nsfw=false&humor=false&limit=1`. The adult and joke flags
 matter because the artwork is community uploaded. There is no `official` style; the styles
 are `alternate`, `material`, `no_logo` and `white_logo`, so the first result is simply taken.
-The stored address is the thumbnail rather than the full picture, since it is only ever drawn
-at 44x66.
+The stored address is the thumbnail rather than the full picture. The two were measured: the
+thumbnail is 267x400 and 67 KB, the full one 600x900 and 762 KB. At the 88x132 the list draws
+a three times density screen asks for roughly 264x396 pixels, so the thumbnail is already the
+right size and the full picture would be eleven times the traffic for nothing.
 
 The lookup runs after a save, not before it, and is never awaited by the caller. Two requests
 to a foreign server would otherwise hold the form open every time a game is saved. It only

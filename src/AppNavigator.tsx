@@ -192,6 +192,22 @@ function MainStack() {
     ]);
   }
 
+  // Asked before applying, because this is the one row action that takes the game
+  // out of the list the user is looking at.
+  function confirmMarkPlayed(game: Game) {
+    showAppAlert(
+      strings.alerts.markPlayedTitle,
+      strings.alerts.markPlayedMessage(game.name),
+      [
+        { text: strings.actions.cancel, style: 'cancel' },
+        {
+          text: strings.actions.markPlayed,
+          onPress: () => void handleSaveGame({ ...game, isPlayed: true }),
+        },
+      ],
+    );
+  }
+
   function confirmDeleteGame(game: Game) {
     showAppAlert(
       strings.alerts.deleteGameTitle,
@@ -250,9 +266,7 @@ function MainStack() {
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
                     onChangeAccess={chooseAccess}
-                    onMarkPlayed={(game) =>
-                      void handleSaveGame({ ...game, isPlayed: true })
-                    }
+                    onMarkPlayed={confirmMarkPlayed}
                     onReorder={(updates) => void handleReorder(updates)}
                     tab={tab}
                   />

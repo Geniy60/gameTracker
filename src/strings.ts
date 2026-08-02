@@ -33,6 +33,7 @@ export const strings = {
   actions: {
     cancel: 'Отмена',
     delete: 'Удалить',
+    markPlayed: 'Отметить',
     ok: 'ОК',
     resetFilters: 'Сбросить',
     save: 'Сохранить',
@@ -79,6 +80,9 @@ export const strings = {
     loadMessage: 'Проверь подключение к интернету и попробуй ещё раз.',
     saveTitle: 'Не удалось сохранить',
     saveMessage: 'Проверь подключение к интернету и попробуй ещё раз.',
+    markPlayedTitle: 'Отметить пройденной?',
+    markPlayedMessage: (name: string) =>
+      `Игра «${name}» уедет во вкладку «Уже играл» и пропадёт из этого списка.`,
     deleteGameTitle: 'Удалить игру?',
     deleteGameMessage: (name: string) =>
       `Игра «${name}» будет удалена без возможности восстановления.`,

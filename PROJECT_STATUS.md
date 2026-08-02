@@ -97,8 +97,9 @@ against the row.
 An unplayed game carries two buttons above the delete one, and neither ever moves or changes
 meaning. The access button opens a dialog offering bought, subscription, at a friend's, and
 no access at all; it stays after a purchase, because it is also how the kind of ownership is
-corrected later. The played button marks the game finished, which is what moves it to the
-other tab. A played game has neither, only delete.
+corrected later. The played button marks the game finished and asks first, since it is the
+one row action that takes the game out of the list being looked at. A played game has
+neither, only delete.
 
 This replaced a single button that derived "the one next move" and changed meaning after each
 tap, so two taps in the same spot did two different things and the second one made the game

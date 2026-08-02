@@ -114,7 +114,7 @@ export function GameCard({
                 pressed && styles.pressedButton,
               ]}
             >
-              <Ionicons color={colors.primary} name="checkmark-done-outline" size={21} />
+              <Ionicons color={colors.primary} name="game-controller-outline" size={21} />
             </Pressable>
           </>
         )}

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -18,6 +19,8 @@ import {
   gamePlatforms,
   hasMultiplePlatforms,
 } from '../../gamePlatforms';
+import { queryKeys } from '../../queryClient';
+import { findGameTitles } from '../../services/steamGridDb';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
 import type { Game, GameAccess, GamePlatform, MainTab } from '../../types';
@@ -55,6 +58,10 @@ const ratingOptions: { label: string; value: number | null }[] = [
   })),
 ];
 
+// Long enough that typing a title does not fire a request per letter.
+const titleSearchDelayMs = 350;
+const minTitleSearchLength = 2;
+
 // A new game starts out looking like the tab it was added from.
 function createDefaults(sourceTab: MainTab): { access: GameAccess | null; isPlayed: boolean } {
   if (sourceTab === 'played') {
@@ -80,6 +87,22 @@ export function GameFormScreen({
   );
   const [rating, setRating] = useState<number | null>(game?.rating ?? null);
   const [note, setNote] = useState(game?.note ?? '');
+  // Suggestions open while the name is being typed and close once one is taken, so
+  // they do not sit under the field for the rest of the form.
+  const [areTitlesOpen, setAreTitlesOpen] = useState(false);
+  const searchedTitle = useDebouncedValue(name.trim(), titleSearchDelayMs);
+  const titlesQuery = useQuery({
+    enabled: areTitlesOpen && searchedTitle.length >= minTitleSearchLength,
+    queryFn: () => findGameTitles(searchedTitle),
+    queryKey: queryKeys.gameTitles(searchedTitle),
+  });
+  // The title already typed in full is not worth offering back.
+  const titles = (titlesQuery.data ?? []).filter((title) => title !== name.trim());
+
+  function takeTitle(title: string) {
+    setName(title);
+    setAreTitlesOpen(false);
+  }
 
   function handleSave() {
     const trimmedName = name.trim();
@@ -123,12 +146,29 @@ export function GameFormScreen({
         <View style={styles.field}>
           <Text style={styles.label}>{strings.gameForm.nameLabel}</Text>
           <TextInput
-            onChangeText={setName}
+            onChangeText={(text) => {
+              setName(text);
+              setAreTitlesOpen(true);
+            }}
             placeholder={strings.gameForm.namePlaceholder}
             placeholderTextColor={colors.muted}
             style={styles.input}
             value={name}
           />
+          {titles.map((title) => (
+            <Pressable
+              key={title}
+              onPress={() => takeTitle(title)}
+              style={({ pressed }) => [
+                styles.titleSuggestion,
+                pressed && styles.pressedButton,
+              ]}
+            >
+              <Text numberOfLines={1} style={styles.titleSuggestionText}>
+                {title}
+              </Text>
+            </Pressable>
+          ))}
         </View>
 
         <View style={styles.field}>
@@ -195,6 +235,19 @@ export function GameFormScreen({
   );
 }
 
+// Keeps the title search from firing on every keystroke.
+function useDebouncedValue(value: string, delayMs: number): string {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delayMs);
+
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+
+  return debouncedValue;
+}
+
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: colors.appBackground,
@@ -227,6 +280,19 @@ const styles = StyleSheet.create({
   noteInput: {
     height: 110,
     paddingTop: 12,
+  },
+  titleSuggestion: {
+    backgroundColor: colors.surface,
+    borderColor: colors.activeBorder,
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  titleSuggestionText: {
+    color: colors.text,
+    fontSize: 15,
   },
   saveButton: {
     alignItems: 'center',

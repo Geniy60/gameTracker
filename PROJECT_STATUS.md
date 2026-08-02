@@ -148,6 +148,11 @@ the list snaps back to the old order the moment the finger is lifted.
 Priorities are saved with plain per-row updates rather than one upsert: an upsert payload
 carrying only `id` and `priority` would be rejected as an insert against the not-null columns.
 
+Typing a name offers title suggestions from SteamGridDB under the field, and taking one closes
+the list. This is not only about saving typing: the cover lookup searches by name, so an exact
+title is what makes it find the right game. The search is debounced and runs through TanStack
+Query, so going back to a term already typed costs nothing.
+
 The add/edit screen is one form with name, access, played, platform, rating, and note
 fields. Access and played are always editable, since they are what move a game between
 tabs. Rating appears only for played games and is cleared on save otherwise; the database
@@ -185,6 +190,19 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Added title suggestions to the game form.
+
+Details:
+
+- `src/services/coversService.ts` became `src/services/steamGridDb.ts`, since it now
+  answers two questions rather than one, and both go to the same service.
+- Suggestions run through TanStack Query with the typed term in the key, debounced by
+  350 ms and only from two characters up.
+- The suggestion list closes when one is taken and reopens on the next keystroke, so it
+  does not sit under the field while the rest of the form is filled in.
+
+Previous step:
 
 Turned dragging off while the wishlist is filtered or searched.
 
@@ -378,14 +396,13 @@ Details:
 
 ## Next Proposed Step
 
-Manual verification of the covers on the phone. The Expo dev server has to be restarted for
-it, since `.env.local` gained a variable and environment values are read when the bundler
-starts.
+Build an installable APK. The app has only ever run through Expo Go, which means the
+development tunnel has to be running on the computer for it to be usable at all. This needs
+`npx eas-cli init` first, since the project is not linked to EAS.
 
-Open afterwards: whether the first search result is the right game often enough. Renaming
-covers the common case; a picker over the candidates is the fallback if it is not enough.
-Also open is whether the long press needs a visible drag handle, since nothing on a row hints
-that it can be dragged.
+Open afterwards: an icon and splash screen, which need an image from the user rather than a
+drawn replacement. Also open is whether the long press needs a visible drag handle, since
+nothing on a row hints that it can be dragged.
 
 ## Important Decisions And Open Questions
 

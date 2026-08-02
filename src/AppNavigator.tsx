@@ -22,7 +22,7 @@ import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilte
 import { nextPriority, type PriorityUpdate } from './gameOrder';
 import type { RootStackParamList } from './navigationTypes';
 import { invalidateGameQueries, queryKeys } from './queryClient';
-import { findCoverUrl } from './services/coversService';
+import { findCoverUrl } from './services/steamGridDb';
 import {
   deleteGame,
   loadGames,

@@ -90,6 +90,7 @@ export const strings = {
   list: {
     loadError: 'Не удалось загрузить список игр.',
     toBuyMark: 'Купить',
+    noAccessMark: 'Нет доступа',
     ratingValue: (rating: number) => `Оценка: ${rating}/10`,
   },
 };

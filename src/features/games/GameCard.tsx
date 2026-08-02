@@ -34,9 +34,12 @@ function createMetaLines(game: Game): string[] {
 
   if (game.access !== null) {
     lines.push(strings.access[game.access]);
-  } else if (!game.isPlayed) {
-    // A played game without access needs no buying, so the mark is for the
-    // wishlist only.
+  } else if (game.isPlayed) {
+    // A game that has been played needs no buying, so the wishlist's call to action
+    // would be wrong here. The line is still needed: without it the card says
+    // nothing about access and leaves the reader to infer it from a gap.
+    lines.push(strings.list.noAccessMark);
+  } else {
     lines.push(strings.list.toBuyMark);
   }
 

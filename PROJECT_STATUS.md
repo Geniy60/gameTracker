@@ -51,7 +51,9 @@ games. Tapping a row opens the edit screen; the trash button deletes after a con
 dialog.
 
 Every row starts with an 88x132 cover picture on the left, followed by a column holding the
-name and one line per property the game actually has: access, rating, and the note. The note
+name and one line per property the game actually has: access, rating, and the note. Access is
+the exception and is always shown: a game without any says `Купить` on the wishlist, where
+that is the next move, and `Нет доступа` on the played tab, where it is only a fact. The note
 comes last, being the only free text. The cover is deliberately large: the wishlist is meant
 to read as a shelf of games rather than a dense table, which is worth the taller rows. Row
 content is top aligned and the action buttons stack in a column on the right, because a short
@@ -198,6 +200,18 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Gave a played game without access its own line on the card.
+
+Details:
+
+- The access line was skipped entirely for a played game with no access, so the card
+  said nothing at all about it. Every card now carries the line.
+- The wording differs by tab because the meaning does: an unplayed game without access
+  says `Купить`, which is the next move, while a played one says `Нет доступа`, which
+  is a fact. Telling someone to buy a game they have already finished would be wrong.
+
+Previous step:
 
 Started the second APK build, version code 3.
 

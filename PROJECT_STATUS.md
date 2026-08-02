@@ -63,9 +63,14 @@ at 44x66.
 
 The lookup runs after a save, not before it, and is never awaited by the caller. Two requests
 to a foreign server would otherwise hold the form open every time a game is saved. It only
-runs for a game whose `cover_url` is still empty, so existing games pick up a cover the first
-time they are saved or a quick step is used on them. Every failure is silent: a game without
-a cover is a normal game.
+runs for a game whose `cover_url` is still empty. Every failure is silent: a game without a
+cover is a normal game.
+
+A cover belongs to the name it was found by, so renaming a game in the form clears it and the
+following save looks up a new one. That is the whole cure for a wrong cover: correct the
+title, save, get the right picture. It does not help when the title is already right and the
+service simply returned the wrong artwork first, which would need a picker showing the
+candidates. That was deliberately not built until it turns out to be needed.
 
 `EXPO_PUBLIC_STEAMGRIDDB_API_KEY` lives in `.env.local`. Being an `EXPO_PUBLIC_` variable it
 is embedded in the app bundle. That is an accepted trade-off for skipping a local script: the
@@ -319,11 +324,10 @@ Manual verification of the covers on the phone. The Expo dev server has to be re
 it, since `.env.local` gained a variable and environment values are read when the bundler
 starts.
 
-Open afterwards: games that are never saved again keep their placeholder, so a way to fill
-covers for the existing list may be wanted. Also open is whether the first search result is
-the right game often enough, or whether a game needs a way to correct its cover by hand.
-And whether the long press needs a visible drag handle, since nothing on a row hints that it
-can be dragged.
+Open afterwards: whether the first search result is the right game often enough. Renaming
+covers the common case; a picker over the candidates is the fallback if it is not enough.
+Also open is whether the long press needs a visible drag handle, since nothing on a row hints
+that it can be dragged.
 
 ## Important Decisions And Open Questions
 

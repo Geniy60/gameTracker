@@ -91,8 +91,10 @@ export function GameFormScreen({
 
     onSave({
       access,
-      // Nothing sets a cover yet; editing a game must not drop the one it has.
-      coverUrl: game?.coverUrl ?? null,
+      // A cover belongs to the name it was found by. Renaming a game drops it, and
+      // the save that follows looks up a new one, which is how a wrong cover is
+      // fixed.
+      coverUrl: game !== null && game.name === trimmedName ? game.coverUrl : null,
       // The database owns createdAt; this value only keeps the object complete
       // until the list refetches.
       createdAt: game?.createdAt ?? new Date().toISOString(),

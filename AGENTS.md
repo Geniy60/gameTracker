@@ -305,6 +305,10 @@ When the user asks to build a new APK, automatically increment the Android `vers
 
 When the user asks to build a new APK, start the EAS APK build command, confirm only that the build was submitted or queued, and then stop. Do not keep the command/chat waiting for the final cloud build result unless explicitly asked.
 
+Pass `--no-wait` to the EAS build command. Without it the command streams the cloud build to the end, which blocks the session for as long as the build takes. Report the build URL and stop; check the result later with `eas build:list` only if the user asks.
+
+Cloud build minutes are limited. Before starting a build, verify locally: `npx expo-doctor`, `npx tsc --noEmit`, `npm test`, and a production bundle through `npx expo export`. Also confirm that every `EXPO_PUBLIC_` variable the app reads exists in the EAS environment the build profile names, because `.env.local` is ignored by git and never reaches the build.
+
 If the user moves on to the next task after a UI change, treat manual phone verification as completed.
 
 Do not add separate `PROJECT_STATUS.md` entries just to record routine manual phone verification.

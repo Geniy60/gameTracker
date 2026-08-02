@@ -74,12 +74,14 @@ function createAccessTag(game: Game): GameTag {
     return { icon: 'people-outline', label: strings.access.friend };
   }
 
-  // The same fact reads differently by tab: something still to buy on the wishlist,
-  // a game no longer reachable on the played one.
-  return {
-    icon: 'lock-closed-outline',
-    label: game.progress === 'none' ? strings.list.toBuyMark : strings.list.noAccessMark,
-  };
+  // The same fact reads differently by tab, so the mark does too: a price tag for
+  // something still to buy on the wishlist, a padlock for a game that has been played
+  // and is no longer reachable, where telling the user to buy it would make no sense.
+  if (game.progress === 'none') {
+    return { icon: 'logo-usd', label: strings.list.toBuyMark };
+  }
+
+  return { icon: 'lock-closed-outline', label: strings.list.noAccessMark };
 }
 
 export function GameCard({
@@ -138,7 +140,7 @@ export function GameCard({
               key={tag.icon}
               style={styles.tag}
             >
-              <Ionicons color={colors.muted} name={tag.icon} size={16} />
+              <Ionicons color={colors.muted} name={tag.icon} size={20} />
             </View>
           ))}
         </View>
@@ -221,11 +223,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.panel,
     borderColor: colors.border,
-    borderRadius: 6,
+    borderRadius: 7,
     borderWidth: 1,
-    height: 28,
+    height: 34,
     justifyContent: 'center',
-    width: 28,
+    width: 34,
   },
   // The accent frame the add button and the active tab already use, so the buttons
   // read as controls rather than as dim outlines next to the destructive one.

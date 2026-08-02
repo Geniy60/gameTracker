@@ -100,6 +100,9 @@ export function GamesScreen({
     game.name.toLowerCase().includes(normalizedSearch),
   );
   const isNarrowed = normalizedSearch.length > 0 || activeFilter !== 'all';
+  // Reordering a narrowed list would move a game past rows the user cannot see, so
+  // the result would not be the one the drag appeared to describe.
+  const canReorder = tab === 'wishlist' && !isNarrowed;
 
   function resetFilters() {
     setSearchText('');
@@ -162,13 +165,13 @@ export function GamesScreen({
           cellAnimations={dragCellAnimations}
           contentContainerStyle={styles.listContent}
           data={visibleGames}
-          dragEnabled={tab === 'wishlist'}
+          dragEnabled={canReorder}
           keyExtractor={(game) => game.id}
           keyboardShouldPersistTaps="handled"
           onReorder={handleReorder}
           panGesture={dragGesture}
           renderItem={({ item }) =>
-            tab === 'wishlist' ? (
+            canReorder ? (
               <DraggableGameRow
                 game={item}
                 onChangeAccess={onChangeAccess}

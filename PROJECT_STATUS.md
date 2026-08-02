@@ -137,11 +137,13 @@ past the list bounds, where Android clips, so the side borders and rounded corne
 off while dragging. Bringing it back would mean moving the screen's horizontal padding into
 the list content container, which would also stretch the top line across the full width.
 
-Dragging happens inside the list the user sees, which the ownership filter and the search box
-can narrow. `reorderPriorities` in `src/gameOrder.ts` therefore reuses the priority values the
-visible games already occupy instead of renumbering everything, which leaves every hidden game
-exactly where it was. It is unit tested. The new order is written into the query cache before
-the request, otherwise the list snaps back to the old order the moment the finger is lifted.
+Dragging is offered only on the whole wishlist. With a filter or a search active it is turned
+off, because a row would then be dropped past neighbours the user cannot see and the resulting
+order would not be the one the drag described. Played games still carry priority values, so
+`reorderPriorities` in `src/gameOrder.ts` reuses the values the wishlist games already occupy
+rather than renumbering from one, which leaves the played ones interleaved where they were. It
+is unit tested. The new order is written into the query cache before the request, otherwise
+the list snaps back to the old order the moment the finger is lifted.
 
 Priorities are saved with plain per-row updates rather than one upsert: an upsert payload
 carrying only `id` and `priority` would be rejected as an insert against the not-null columns.
@@ -183,6 +185,16 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Turned dragging off while the wishlist is filtered or searched.
+
+Details:
+
+- A drag on a narrowed list moved a row past neighbours that were not on screen, so
+  the order it produced was not the one it appeared to describe.
+- Rows only subscribe to the drag gesture when the whole wishlist is showing.
+
+Previous step:
 
 Removed the app header.
 

@@ -8,9 +8,10 @@ export function nextPriority(games: Game[]): number {
   return games.reduce((highest, game) => Math.max(highest, game.priority), 0) + 1;
 }
 
-// Dragging happens inside the list the user sees, which the ownership filter and the
-// search box can narrow. Reusing the priority values the visible games already occupy
-// keeps every hidden game exactly where it was.
+// Dragging is only offered on the whole wishlist, never on a filtered or searched
+// one, since moving a row past invisible neighbours gives a result the drag did not
+// describe. Played games still hold priority values though, so the reordering reuses
+// the values the wishlist games already occupy rather than renumbering from one.
 export function reorderPriorities(
   visibleGames: Game[],
   fromIndex: number,

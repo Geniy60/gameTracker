@@ -45,10 +45,10 @@ describe('reorderPriorities', () => {
     expect(reorderPriorities([first, second, third], 1, 1)).toEqual([]);
   });
 
-  it('only reuses the values of the visible games, so hidden ones stay put', () => {
-    const visible = [createGame('a', 2), createGame('b', 5)];
+  it('only reuses the values of the listed games, so played ones stay put', () => {
+    const listed = [createGame('a', 2), createGame('b', 5)];
 
-    expect(reorderPriorities(visible, 1, 0)).toEqual([
+    expect(reorderPriorities(listed, 1, 0)).toEqual([
       { id: 'b', priority: 2 },
       { id: 'a', priority: 5 },
     ]);

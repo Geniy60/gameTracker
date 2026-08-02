@@ -15,7 +15,6 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { showAppAlert } from './appAlert';
 import { AppAlertHost } from './components/AppAlertHost';
-import { AppHeader } from './components/AppHeader';
 import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
 import { GamesScreen } from './features/games/GamesScreen';
@@ -45,7 +44,6 @@ const accessChoices: { access: GameAccess | null; label: string }[] = [
 ];
 
 const Stack = createStackNavigator<RootStackParamList>();
-const MIN_REFRESH_FEEDBACK_MS = 600;
 // Left to right order of the swipe pager. Must match the tab row.
 const tabOrder: MainTab[] = ['wishlist', 'played'];
 
@@ -78,7 +76,6 @@ export function AppNavigator() {
 function MainStack() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<MainTab>('wishlist');
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { width: pageWidth } = useWindowDimensions();
   const pagerRef = useRef<ScrollView>(null);
   const gamesQuery = useQuery({ queryKey: queryKeys.games, queryFn: loadGames });
@@ -104,24 +101,6 @@ function MainStack() {
       showAppAlert(strings.alerts.loadTitle, strings.alerts.loadMessage);
     }
   }, [gamesQuery.isError]);
-
-  async function refreshGames() {
-    if (isRefreshing) {
-      return;
-    }
-
-    setIsRefreshing(true);
-    const startedAt = Date.now();
-
-    try {
-      await invalidateGameQueries(queryClient);
-    } finally {
-      setTimeout(
-        () => setIsRefreshing(false),
-        Math.max(0, MIN_REFRESH_FEEDBACK_MS - (Date.now() - startedAt)),
-      );
-    }
-  }
 
   async function handleSaveGame(game: Game): Promise<boolean> {
     try {
@@ -240,7 +219,6 @@ function MainStack() {
       <Stack.Screen name="Home">
         {({ navigation }) => (
           <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safeArea}>
-            <AppHeader isRefreshing={isRefreshing} onRefresh={() => void refreshGames()} />
             <MainTabs activeTab={activeTab} onSelectTab={openTab} />
             <ScrollView
               horizontal

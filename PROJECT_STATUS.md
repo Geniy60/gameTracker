@@ -29,6 +29,13 @@ There used to be a third `Есть` tab. It was removed because ownership is a p
 wanted game, not a separate list, and a played game that is still owned had to appear in two
 tabs at once.
 
+There is no app header. `UI_RULES.md` asks for one, and this screen deliberately departs from
+it: a title naming the app the user just opened, next to a refresh button for data only this
+phone ever writes, was costing vertical space on a list of tall cards. Losing the button
+leaves no manual refetch, which is acceptable because every mutation already invalidates the
+query and nothing else writes to the table. Pull to refresh is the obvious replacement if one
+is ever wanted.
+
 The two tabs live in a horizontal paging `ScrollView`, so they can be swiped between as well
 as tapped, following the sibling Fridge app. Tapping a tab scrolls the pager without
 animation; swiping updates the active tab from the scroll offset. The pager is never
@@ -176,6 +183,16 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Removed the app header.
+
+Details:
+
+- Deleted `src/components/AppHeader.tsx` along with the refresh state, its minimum
+  feedback delay, the app title string and the refresh accessibility label.
+- The tab row is now the first thing under the safe area.
+
+Previous step:
 
 Replaced the shape-shifting quick-step button with two fixed ones.
 

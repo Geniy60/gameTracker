@@ -1,9 +1,6 @@
 import type { GameAccess, GamePlatform, MainTab, WishlistFilter } from './types';
 
 export const strings = {
-  app: {
-    title: 'GameTracker',
-  },
   tabs: {
     wishlist: 'Хочу поиграть',
     played: 'Уже играл',
@@ -69,7 +66,6 @@ export const strings = {
     clearSearch: 'Очистить поиск',
     deleteGame: 'Удалить игру',
     markPlayed: 'Отметить, что играл',
-    refreshData: 'Обновить данные',
     search: 'Поиск',
   },
   alerts: {

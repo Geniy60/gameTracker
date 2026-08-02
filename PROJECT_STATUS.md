@@ -225,9 +225,13 @@ Details:
 - Nothing collided with the played tab. The two near misses were `Hollow Knight:
   Silksong` against `Hollow knight` and `FINAL FANTASY XV` against `FINAL FANTASY XVI`,
   which are different games.
-- Add-ons were left out rather than guessed at: the Erdtree edition of a finished
-  `ELDEN RING`, `Lies of P: Overture`, and the Cuphead expansion.
-- The table now holds 165 games, 72 of them in the wishlist.
+- Add-ons were left out rather than guessed at, then two were added back on request:
+  `ELDEN RING Shadow of the Erdtree` and `Lies of P: Overture`. Both base games are
+  already finished, so these are wanted as expansions in their own right. The Cuphead
+  expansion stayed out.
+- SteamGridDB has no entry for the Lies of P expansion, so its cover was searched under
+  the base game. The two rows still ended up with different artwork.
+- The table now holds 167 games, 74 of them in the wishlist.
 
 Previous step:
 

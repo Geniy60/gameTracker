@@ -1,4 +1,10 @@
-import type { GameAccess, GamePlatform, MainTab, WishlistFilter } from './types';
+import type {
+  GameAccess,
+  GamePlatform,
+  GameProgress,
+  MainTab,
+  WishlistFilter,
+} from './types';
 
 export const strings = {
   tabs: {
@@ -30,7 +36,6 @@ export const strings = {
   actions: {
     cancel: 'Отмена',
     delete: 'Удалить',
-    markPlayed: 'Отметить',
     ok: 'ОК',
     resetFilters: 'Сбросить',
     save: 'Сохранить',
@@ -42,9 +47,7 @@ export const strings = {
     namePlaceholder: 'Например, Hollow Knight',
     accessLabel: 'Доступ',
     accessNone: 'Нет доступа',
-    playedLabel: 'Играл в неё',
-    playedNo: 'Ещё нет',
-    playedYes: 'Играл',
+    progressLabel: 'Прогресс',
     platformLabel: 'Платформа',
     coverLabel: 'Обложка',
     coverPlaceholder: 'Ссылка на картинку',
@@ -59,6 +62,11 @@ export const strings = {
     friend: 'Есть у друга',
     subscription: 'В подписке',
   } satisfies Record<GameAccess, string>,
+  progress: {
+    none: 'Ещё нет',
+    played: 'Играл',
+    finished: 'Прошёл',
+  } satisfies Record<GameProgress, string>,
   platforms: {
     playstation: 'PlayStation',
   } satisfies Record<GamePlatform, string>,
@@ -69,7 +77,7 @@ export const strings = {
     clearSearch: 'Очистить поиск',
     pickCover: 'Подобрать обложку',
     deleteGame: 'Удалить игру',
-    markPlayed: 'Отметить, что играл',
+    chooseProgress: 'Отметить прогресс',
     search: 'Поиск',
   },
   alerts: {
@@ -80,9 +88,7 @@ export const strings = {
     loadMessage: 'Проверь подключение к интернету и попробуй ещё раз.',
     saveTitle: 'Не удалось сохранить',
     saveMessage: 'Проверь подключение к интернету и попробуй ещё раз.',
-    markPlayedTitle: 'Отметить пройденной?',
-    markPlayedMessage: (name: string) =>
-      `Игра «${name}» уедет во вкладку «Уже играл» и пропадёт из этого списка.`,
+    progressTitle: 'Отметить прогресс',
     deleteGameTitle: 'Удалить игру?',
     deleteGameMessage: (name: string) =>
       `Игра «${name}» будет удалена без возможности восстановления.`,

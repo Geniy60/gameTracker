@@ -6,11 +6,13 @@ export function selectGamesForTab(games: Game[], tab: MainTab): Game[] {
 
 export function filterGamesByTab(games: Game[], tab: MainTab): Game[] {
   if (tab === 'played') {
-    return games.filter((game) => game.isPlayed);
+    // Both started and finished games. The difference is shown on the card, not by
+    // splitting the tab: a tab holding one game was the problem the third tab had.
+    return games.filter((game) => game.progress !== 'none');
   }
 
   // Everything still worth playing, owned or not. Ownership is a filter on top.
-  return games.filter((game) => !game.isPlayed);
+  return games.filter((game) => game.progress === 'none');
 }
 
 // The ownership filter inside the wishlist.
@@ -41,5 +43,5 @@ function sortGamesForTab(games: Game[], tab: MainTab): Game[] {
 
 // Where to send the user after a save that moved the game out of the current tab.
 export function findTabForGame(game: Game): MainTab {
-  return game.isPlayed ? 'played' : 'wishlist';
+  return game.progress === 'none' ? 'wishlist' : 'played';
 }

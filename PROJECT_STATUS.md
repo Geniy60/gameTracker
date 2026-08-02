@@ -12,7 +12,13 @@ dark palette too.
 A game has two independent properties rather than one status:
 
 - `access`: `purchased`, `friend`, `subscription`, or `null` for no access at all
-- `isPlayed`: whether the user has played it
+- `progress`: `none`, `played`, or `finished`
+
+`progress` is one scale rather than two flags, because a game cannot be finished without
+having been played. Two booleans would have allowed a combination that means nothing and
+would have needed a constraint to forbid it. This is not the old `status` column returning:
+that one conflated ownership with progress, which are genuinely independent, while these
+three values are stages of one thing.
 
 The wishlist is the point of the app: everything the user still wants to play. Ownership
 does not decide whether a game belongs there, so there are only two tabs:
@@ -51,7 +57,9 @@ games. Tapping a row opens the edit screen; the trash button deletes after a con
 dialog.
 
 Every row starts with an 88x132 cover picture on the left, followed by a column holding the
-name and one line per property the game actually has: access, rating, and the note. Access is
+name and one line per property the game actually has: access, progress, rating, and the note.
+Progress is shown on the played tab only, where it is what separates two games; on the
+wishlist every row would repeat the same "not yet". Access is
 the exception and is always shown: a game without any says `Купить` on the wishlist, where
 that is the next move, and `Нет доступа` on the played tab, where it is only a fact. The note
 comes last, being the only free text. The cover is deliberately large: the wishlist is meant
@@ -113,9 +121,10 @@ against the row.
 An unplayed game carries two buttons above the delete one, and neither ever moves or changes
 meaning. The access button opens a dialog offering bought, subscription, at a friend's, and
 no access at all; it stays after a purchase, because it is also how the kind of ownership is
-corrected later. The played button marks the game finished and asks first, since it is the
-one row action that takes the game out of the list being looked at. A played game has
-neither, only delete.
+corrected later. The progress button opens the same kind of dialog, offering played and
+finished. Asking rather than guessing also serves as the confirmation this action needs,
+since it is the one row action that takes the game out of the list being looked at. A game
+that is no longer in the wishlist has neither button, only delete.
 
 This replaced a single button that derived "the one next move" and changed meaning after each
 tap, so two taps in the same spot did two different things and the second one made the game
@@ -162,13 +171,13 @@ the list. This is not only about saving typing: the cover lookup searches by nam
 title is what makes it find the right game. The search is debounced and runs through TanStack
 Query, so going back to a term already typed costs nothing.
 
-The add/edit screen is one form with name, access, played, platform, rating, and note
-fields. Access and played are always editable, since they are what move a game between
-tabs. Rating appears only for played games and is cleared on save otherwise; the database
-enforces the same rule with a check constraint.
+The add/edit screen is one form with name, cover, access, progress, platform, rating, and
+note fields. Access and progress are always editable, since they are what move a game between
+tabs. Rating appears once progress leaves `none` and is cleared on save otherwise; the
+database enforces the same rule with a check constraint.
 
 A new game inherits its defaults from the tab the add button was pressed on: the wishlist
-starts with no access and unplayed, the played tab starts as purchased and played.
+starts with no access and no progress, the played tab starts as purchased and finished.
 
 Saving can move a game out of the tab it was edited in. When that happens the app switches
 to the tab where the game now belongs instead of returning to a list that no longer contains
@@ -200,6 +209,35 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Split "played" into played and finished.
+
+Details:
+
+- Applied `supabase/migrations/20260802160000_gametracker_game_progress.sql`: added the
+  `progress` column with its value check, carried `is_played` over, re-pointed the
+  rating constraint at `progress`, and dropped `is_played`.
+- Every existing game was migrated to `finished` at the owner's instruction. All 93 of
+  them came from the PSN import and are finished; the exceptions get corrected by hand,
+  which beats guessing from trophy counts.
+- One field with three values rather than a second boolean. `is_finished` beside
+  `is_played` would have allowed "not played but finished", which means nothing and
+  would have needed a constraint to forbid.
+- The row button now asks played or finished instead of assuming, the same way the
+  access button asks which kind of ownership. Guessing the next state was what the
+  deleted `gameActions.ts` used to do.
+- The card shows the state as its own line, but only on the played tab. On the wishlist
+  every row would repeat the same "not yet".
+- The import script writes `played` for new rows: a trophy list says a game was
+  launched, not that it was completed, and it makes anything new stand out against the
+  finished ones.
+- Verified against the database that a value outside the three is rejected, that a
+  rating on a wishlist game is rejected, and that a rating on a played one is accepted.
+  The test row was removed.
+- The tab layout is unchanged. Splitting the played tab in two would have brought back
+  the near-empty third tab that was already removed once.
+
+Previous step:
 
 Gave a played game without access its own line on the card.
 
@@ -579,8 +617,9 @@ Open afterwards:
 
 ## Important Decisions And Open Questions
 
-- No status field. Tabs are derived from `isPlayed` alone; `access` only drives the wishlist
-  filter. A "playing now" flag was discussed and deliberately deferred.
+- Tabs are derived from `progress` alone; `access` only drives the wishlist filter. A
+  "playing now" flag was discussed and deliberately deferred, and `progress` is not the
+  place for it: playing now is a fact about today, not a stage that has been reached.
 - Drag-and-drop was chosen over move-up arrows after the trade-off was laid out, in exchange
   for the Reanimated dependency chain.
 - Dark theme only. A light theme was deliberately deferred.

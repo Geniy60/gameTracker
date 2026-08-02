@@ -32,7 +32,7 @@ import {
 } from './services/gamesService';
 import { strings } from './strings';
 import { colors } from './theme/colors';
-import type { Game, GameAccess, MainTab } from './types';
+import type { Game, GameAccess, GameProgress, MainTab } from './types';
 
 // The choices behind the access button on a row, in the order they are offered.
 // "No access" comes last: it is the way back from a wrong tap, not a normal pick.
@@ -41,6 +41,13 @@ const accessChoices: { access: GameAccess | null; label: string }[] = [
   { access: 'subscription', label: strings.access.subscription },
   { access: 'friend', label: strings.access.friend },
   { access: null, label: strings.gameForm.accessNone },
+];
+
+// The two states a wishlist game can move to. 'none' is not offered: this button
+// only ever takes a game out of the wishlist.
+const progressChoices: { label: string; progress: GameProgress }[] = [
+  { progress: 'played', label: strings.progress.played },
+  { progress: 'finished', label: strings.progress.finished },
 ];
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -171,20 +178,17 @@ function MainStack() {
     ]);
   }
 
-  // Asked before applying, because this is the one row action that takes the game
-  // out of the list the user is looking at.
-  function confirmMarkPlayed(game: Game) {
-    showAppAlert(
-      strings.alerts.markPlayedTitle,
-      strings.alerts.markPlayedMessage(game.name),
-      [
-        { text: strings.actions.cancel, style: 'cancel' },
-        {
-          text: strings.actions.markPlayed,
-          onPress: () => void handleSaveGame({ ...game, isPlayed: true }),
-        },
-      ],
-    );
+  // Asks which of the two states the game reached rather than guessing, and the
+  // question doubles as the confirmation this action needs: it is the one row action
+  // that takes the game out of the list the user is looking at.
+  function chooseProgress(game: Game) {
+    showAppAlert(strings.alerts.progressTitle, game.name, [
+      ...progressChoices.map((choice) => ({
+        text: choice.label,
+        onPress: () => void handleSaveGame({ ...game, progress: choice.progress }),
+      })),
+      { text: strings.actions.cancel, style: 'cancel' as const },
+    ]);
   }
 
   function confirmDeleteGame(game: Game) {
@@ -244,7 +248,7 @@ function MainStack() {
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
                     onChangeAccess={chooseAccess}
-                    onMarkPlayed={confirmMarkPlayed}
+                    onChooseProgress={chooseProgress}
                     onReorder={(updates) => void handleReorder(updates)}
                     tab={tab}
                   />

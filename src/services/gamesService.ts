@@ -6,7 +6,7 @@ export async function loadGames(): Promise<Game[]> {
   const { data, error } = await supabase
     .from('gametracker_games')
     .select(
-      'id, created_at, name, access, is_played, priority, cover_url, platform, rating, note',
+      'id, created_at, name, access, progress, priority, cover_url, platform, rating, note',
     );
 
   if (error) {
@@ -18,7 +18,7 @@ export async function loadGames(): Promise<Game[]> {
     createdAt: row.created_at,
     name: row.name,
     access: row.access,
-    isPlayed: row.is_played,
+    progress: row.progress,
     priority: row.priority,
     coverUrl: row.cover_url,
     platform: row.platform,
@@ -34,12 +34,12 @@ export async function saveGame(game: Game): Promise<void> {
     access: game.access,
     cover_url: game.coverUrl,
     id: game.id,
-    is_played: game.isPlayed,
     name: game.name,
     note: game.note,
     platform: game.platform,
     priority: game.priority,
-    rating: game.isPlayed ? game.rating : null,
+    progress: game.progress,
+    rating: game.progress === 'none' ? null : game.rating,
   });
 
   if (error) {

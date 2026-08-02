@@ -9,6 +9,10 @@ export type WishlistFilter = 'all' | 'owned' | 'toBuy';
 // How the user can reach the game right now. null means no access at all.
 export type GameAccess = 'purchased' | 'friend' | 'subscription';
 
+// One scale rather than two flags: a game cannot be finished without having been
+// played, so the states are stages, not independent facts. 'none' is the wishlist.
+export type GameProgress = 'none' | 'played' | 'finished';
+
 // Only PlayStation is used right now. To add a platform later, extend this union
 // and the two lists in gamePlatforms.ts and strings.platforms. The database check
 // constraint already allows 'pc', 'xbox', 'switch', 'mobile', and 'other'.
@@ -20,7 +24,7 @@ export type Game = {
   createdAt: string;
   name: string;
   access: GameAccess | null;
-  isPlayed: boolean;
+  progress: GameProgress;
   // Manual wishlist order. Lower means higher in the list.
   priority: number;
   // Address of the cover picture, or null while the game has none.

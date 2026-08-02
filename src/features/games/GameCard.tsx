@@ -14,7 +14,7 @@ type GameCardProps = {
   onLongPress?: () => void;
   onChangeAccess: (game: Game) => void;
   onDelete: (game: Game) => void;
-  onMarkPlayed: (game: Game) => void;
+  onChooseProgress: (game: Game) => void;
   onPress: (game: Game) => void;
 };
 
@@ -34,13 +34,19 @@ function createMetaLines(game: Game): string[] {
 
   if (game.access !== null) {
     lines.push(strings.access[game.access]);
-  } else if (game.isPlayed) {
+  } else if (game.progress === 'none') {
+    lines.push(strings.list.toBuyMark);
+  } else {
     // A game that has been played needs no buying, so the wishlist's call to action
     // would be wrong here. The line is still needed: without it the card says
     // nothing about access and leaves the reader to infer it from a gap.
     lines.push(strings.list.noAccessMark);
-  } else {
-    lines.push(strings.list.toBuyMark);
+  }
+
+  // Only on the played tab, where it is the one thing that separates two games.
+  // On the wishlist every row would repeat the same "not yet".
+  if (game.progress !== 'none') {
+    lines.push(strings.progress[game.progress]);
   }
 
   if (game.rating !== null) {
@@ -59,7 +65,7 @@ export function GameCard({
   onLongPress,
   onChangeAccess,
   onDelete,
-  onMarkPlayed,
+  onChooseProgress,
   onPress,
 }: GameCardProps) {
   const metaLines = createMetaLines(game);
@@ -106,7 +112,7 @@ export function GameCard({
         {/* Both buttons stay put for as long as the game is unplayed. The access one
             never disappears after a purchase: it is how the kind of ownership is set
             and later changed. */}
-        {game.isPlayed ? null : (
+        {game.progress === 'none' ? (
           <>
             <Pressable
               accessibilityLabel={strings.accessibility.changeAccess}
@@ -120,9 +126,9 @@ export function GameCard({
               <Ionicons color={colors.primary} name="bag-outline" size={21} />
             </Pressable>
             <Pressable
-              accessibilityLabel={strings.accessibility.markPlayed}
+              accessibilityLabel={strings.accessibility.chooseProgress}
               hitSlop={6}
-              onPress={() => onMarkPlayed(game)}
+              onPress={() => onChooseProgress(game)}
               style={({ pressed }) => [
                 styles.actionButton,
                 pressed && styles.pressedButton,
@@ -131,7 +137,7 @@ export function GameCard({
               <Ionicons color={colors.primary} name="game-controller-outline" size={21} />
             </Pressable>
           </>
-        )}
+        ) : null}
         <Pressable
           accessibilityLabel={strings.accessibility.deleteGame}
           hitSlop={6}

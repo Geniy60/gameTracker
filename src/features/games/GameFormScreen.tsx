@@ -25,7 +25,13 @@ import { queryKeys } from '../../queryClient';
 import { findCoverOptions, findGameTitles } from '../../services/steamGridDb';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
-import type { Game, GameAccess, GamePlatform, MainTab } from '../../types';
+import type {
+  Game,
+  GameAccess,
+  GamePlatform,
+  GameProgress,
+  MainTab,
+} from '../../types';
 
 type GameFormScreenProps = {
   game: Game | null;
@@ -43,9 +49,10 @@ const accessOptions: { label: string; value: GameAccess | null }[] = [
   { label: strings.access.subscription, value: 'subscription' },
 ];
 
-const playedOptions: { label: string; value: boolean }[] = [
-  { label: strings.gameForm.playedNo, value: false },
-  { label: strings.gameForm.playedYes, value: true },
+const progressOptions: { label: string; value: GameProgress }[] = [
+  { label: strings.progress.none, value: 'none' },
+  { label: strings.progress.played, value: 'played' },
+  { label: strings.progress.finished, value: 'finished' },
 ];
 
 const platformOptions: { label: string; value: GamePlatform }[] = gamePlatforms.map(
@@ -64,13 +71,17 @@ const ratingOptions: { label: string; value: number | null }[] = [
 const titleSearchDelayMs = 350;
 const minTitleSearchLength = 2;
 
-// A new game starts out looking like the tab it was added from.
-function createDefaults(sourceTab: MainTab): { access: GameAccess | null; isPlayed: boolean } {
+// A new game starts out looking like the tab it was added from. The played tab
+// starts at 'finished', which is what most of what lands there is.
+function createDefaults(sourceTab: MainTab): {
+  access: GameAccess | null;
+  progress: GameProgress;
+} {
   if (sourceTab === 'played') {
-    return { access: 'purchased', isPlayed: true };
+    return { access: 'purchased', progress: 'finished' };
   }
 
-  return { access: null, isPlayed: false };
+  return { access: null, progress: 'none' };
 }
 
 export function GameFormScreen({
@@ -83,7 +94,9 @@ export function GameFormScreen({
   const defaults = createDefaults(sourceTab);
   const [name, setName] = useState(game?.name ?? '');
   const [access, setAccess] = useState<GameAccess | null>(game?.access ?? defaults.access);
-  const [isPlayed, setIsPlayed] = useState(game?.isPlayed ?? defaults.isPlayed);
+  const [progress, setProgress] = useState<GameProgress>(
+    game?.progress ?? defaults.progress,
+  );
   const [platform, setPlatform] = useState<GamePlatform>(
     game?.platform ?? defaultGamePlatform,
   );
@@ -150,12 +163,12 @@ export function GameFormScreen({
       // until the list refetches.
       createdAt: game?.createdAt ?? new Date().toISOString(),
       id: game?.id ?? createId(),
-      isPlayed,
+      progress,
       name: trimmedName,
       note: note.trim(),
       platform,
       priority: game?.priority ?? newGamePriority,
-      rating: isPlayed ? rating : null,
+      rating: progress === 'none' ? null : rating,
     });
   }
 
@@ -258,11 +271,11 @@ export function GameFormScreen({
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>{strings.gameForm.playedLabel}</Text>
+          <Text style={styles.label}>{strings.gameForm.progressLabel}</Text>
           <OptionChips
-            onSelect={setIsPlayed}
-            options={playedOptions}
-            selectedValue={isPlayed}
+            onSelect={setProgress}
+            options={progressOptions}
+            selectedValue={progress}
           />
         </View>
 
@@ -277,7 +290,7 @@ export function GameFormScreen({
           </View>
         ) : null}
 
-        {isPlayed ? (
+        {progress === 'none' ? null : (
           <View style={styles.field}>
             <Text style={styles.label}>{strings.gameForm.ratingLabel}</Text>
             <OptionChips
@@ -286,7 +299,7 @@ export function GameFormScreen({
               selectedValue={rating}
             />
           </View>
-        ) : null}
+        )}
 
         <View style={styles.field}>
           <Text style={styles.label}>{strings.gameForm.noteLabel}</Text>

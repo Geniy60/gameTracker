@@ -14,7 +14,7 @@ function createGame(overrides: Partial<Game>): Game {
     createdAt: '2026-08-01T00:00:00Z',
     name: 'Game',
     access: null,
-    isPlayed: false,
+    progress: 'none',
     priority: 1,
     coverUrl: null,
     platform: 'playstation',
@@ -24,12 +24,16 @@ function createGame(overrides: Partial<Game>): Game {
   };
 }
 
-const wanted = createGame({ id: 'wanted', access: null, isPlayed: false });
+const wanted = createGame({ id: 'wanted', access: null, progress: 'none' });
 const ownedUnplayed = createGame({ id: 'owned', access: 'purchased' });
-const ownedPlayed = createGame({ id: 'owned-played', access: 'purchased', isPlayed: true });
-const lostAccessPlayed = createGame({ id: 'lost', access: null, isPlayed: true });
+const ownedPlayed = createGame({
+  id: 'owned-played',
+  access: 'purchased',
+  progress: 'played',
+});
+const lostAccessFinished = createGame({ id: 'lost', access: null, progress: 'finished' });
 
-const allGames = [wanted, ownedUnplayed, ownedPlayed, lostAccessPlayed];
+const allGames = [wanted, ownedUnplayed, ownedPlayed, lostAccessFinished];
 
 describe('filterGamesByTab', () => {
   it('keeps every unplayed game in the wishlist, owned or not', () => {
@@ -37,7 +41,7 @@ describe('filterGamesByTab', () => {
   });
 
   it('keeps a played game in the played list after access is lost', () => {
-    expect(filterGamesByTab(allGames, 'played')).toEqual([ownedPlayed, lostAccessPlayed]);
+    expect(filterGamesByTab(allGames, 'played')).toEqual([ownedPlayed, lostAccessFinished]);
   });
 });
 
@@ -79,8 +83,8 @@ describe('selectGamesForTab', () => {
   });
 
   it('sorts the played tab by name', () => {
-    const zebra = createGame({ id: 'zebra', isPlayed: true, name: 'Zebra' });
-    const apple = createGame({ id: 'apple', isPlayed: true, name: 'Apple' });
+    const zebra = createGame({ id: 'zebra', progress: 'finished', name: 'Zebra' });
+    const apple = createGame({ id: 'apple', progress: 'finished', name: 'Apple' });
 
     expect(selectGamesForTab([zebra, apple], 'played').map((game) => game.id)).toEqual([
       'apple',
@@ -100,7 +104,7 @@ describe('selectGamesForTab', () => {
 describe('findTabForGame', () => {
   it('sends a played game to the played tab whether it is owned or not', () => {
     expect(findTabForGame(ownedPlayed)).toBe('played');
-    expect(findTabForGame(lostAccessPlayed)).toBe('played');
+    expect(findTabForGame(lostAccessFinished)).toBe('played');
   });
 
   it('keeps an unplayed game in the wishlist even when it is owned', () => {

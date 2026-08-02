@@ -9,7 +9,7 @@ function createGame(id: string, priority: number): Game {
     createdAt: '2026-08-01T00:00:00Z',
     name: id,
     access: null,
-    isPlayed: false,
+    progress: 'none',
     priority,
     coverUrl: null,
     platform: 'playstation',

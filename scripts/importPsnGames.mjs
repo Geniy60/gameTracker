@@ -95,11 +95,14 @@ const highestPriority = existingGames.reduce(
   0,
 );
 
+// Imported as "played" rather than "finished": a trophy list says the game was
+// launched, not that it was completed. It also makes new rows stand out against the
+// finished ones already there, which is what a review after an import wants.
 const rows = selectedTitles.map((title, index) => ({
   id: randomUUID(),
   name: title.name,
   access: 'purchased',
-  is_played: true,
+  progress: 'played',
   platform: 'playstation',
   priority: highestPriority + index + 1,
   rating: null,

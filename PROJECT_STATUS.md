@@ -94,15 +94,19 @@ Rows use `subtleBackground`; `panel` and `surface` both sit too close to the app
 to read as separate elements. Row action buttons use the darker `panel` so they stay visible
 against the row.
 
-A row carries a button per action the game still has ahead of it: "bought it" while it has no
-access, and "played it" while it is unplayed. The logic lives in `src/gameActions.ts` and is
-unit tested. "Bought it" keeps the game in the wishlist and only moves it between the
-ownership filters; "played it" is what moves it to the other tab.
+An unplayed game carries two buttons above the delete one, and neither ever moves or changes
+meaning. The access button opens a dialog offering bought, subscription, at a friend's, and
+no access at all; it stays after a purchase, because it is also how the kind of ownership is
+corrected later. The played button marks the game finished, which is what moves it to the
+other tab. A played game has neither, only delete.
 
-This used to be one button that changed its meaning after each tap, so two taps in the same
-spot did two different things and the second one made the game disappear. Splitting them was
-the fix. The buttons hang from the bottom of the row, so losing the "bought it" button does
-not slide the others up under the finger that just tapped.
+This replaced a single button that derived "the one next move" and changed meaning after each
+tap, so two taps in the same spot did two different things and the second one made the game
+disappear. `src/gameActions.ts` existed only to make that guess and was deleted with it.
+
+Row buttons wear the same accent frame as the add button and the active tab, at the 40x40
+UI_RULES gives for roomier cards. The dim outline they had before made them read as smaller
+and less real than the delete button beside them.
 
 Sorting depends on the tab. The wishlist follows the user's own order through the `priority`
 column, lowest first, with `createdAt` breaking ties. The played tab is a reference list
@@ -172,16 +176,17 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
-Split the single quick-step button into one button per action.
+Replaced the shape-shifting quick-step button with two fixed ones.
 
 Details:
 
-- `createQuickStep` became `createGameActions` and returns every action a game still has,
-  in a fixed order, instead of guessing one next move.
+- The access button opens a choice of ownership kind instead of silently setting
+  "purchased", and it stays on the row afterwards so the choice can be changed.
 - A game with no access now shows a "Купить" line, so the card states what it is rather
   than leaving the reader to infer it from a missing line.
-- The action column hangs from the bottom of the row so buttons never move when one of
-  them goes away.
+- Deleted `src/gameActions.ts` and its tests. With both buttons always present there was
+  nothing left to derive.
+- Row buttons grew to 40x40 and took the accent border used elsewhere in the app.
 
 Previous step:
 

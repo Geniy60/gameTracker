@@ -64,14 +64,15 @@ export const strings = {
   accessibility: {
     addGame: 'Добавить игру',
     back: 'Назад',
+    changeAccess: 'Изменить доступ к игре',
     clearSearch: 'Очистить поиск',
     deleteGame: 'Удалить игру',
-    markOwned: 'Отметить, что игра появилась',
     markPlayed: 'Отметить, что играл',
     refreshData: 'Обновить данные',
     search: 'Поиск',
   },
   alerts: {
+    accessTitle: 'Доступ к игре',
     emptyNameTitle: 'Нужно название',
     emptyNameMessage: 'Введи название игры, чтобы сохранить её.',
     loadTitle: 'Не удалось загрузить данные',

@@ -1,9 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { type ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { createGameActions, type GameActionKind } from '../../gameActions';
 import { hasMultiplePlatforms } from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
@@ -13,26 +11,15 @@ type GameCardProps = {
   game: Game;
   // Set on the wishlist only, where a long press starts a drag.
   onLongPress?: () => void;
-  onAction: (game: Game) => void;
+  onChangeAccess: (game: Game) => void;
   onDelete: (game: Game) => void;
+  onMarkPlayed: (game: Game) => void;
   onPress: (game: Game) => void;
 };
 
 // The default 500 ms feels sluggish when the long press is how the wishlist is
 // reordered. Short enough to react quickly, long enough not to fire on a tap.
 const dragHoldDelayMs = 220;
-
-// The action column is as tall as the cover so it can hang its buttons from the
-// bottom, which is what keeps them still when one of them disappears.
-const coverHeight = 132;
-
-const actionIcons: Record<
-  GameActionKind,
-  ComponentProps<typeof Ionicons>['name']
-> = {
-  markOwned: 'bag-check-outline',
-  markPlayed: 'checkmark-done-outline',
-};
 
 // One line per property, under the name. Anything the game does not have is left
 // out, as is metadata that every row in the current tab would repeat. The note goes
@@ -66,12 +53,12 @@ function createMetaLines(game: Game): string[] {
 export function GameCard({
   game,
   onLongPress,
-  onAction,
+  onChangeAccess,
   onDelete,
+  onMarkPlayed,
   onPress,
 }: GameCardProps) {
   const metaLines = createMetaLines(game);
-  const actions = createGameActions(game);
 
   return (
     <Pressable
@@ -102,20 +89,35 @@ export function GameCard({
         ))}
       </View>
       <View style={styles.actions}>
-        {actions.map((action) => (
-          <Pressable
-            accessibilityLabel={strings.accessibility[action.kind]}
-            hitSlop={6}
-            key={action.kind}
-            onPress={() => onAction(action.game)}
-            style={({ pressed }) => [
-              styles.actionButton,
-              pressed && styles.pressedButton,
-            ]}
-          >
-            <Ionicons color={colors.primary} name={actionIcons[action.kind]} size={19} />
-          </Pressable>
-        ))}
+        {/* Both buttons stay put for as long as the game is unplayed. The access one
+            never disappears after a purchase: it is how the kind of ownership is set
+            and later changed. */}
+        {game.isPlayed ? null : (
+          <>
+            <Pressable
+              accessibilityLabel={strings.accessibility.changeAccess}
+              hitSlop={6}
+              onPress={() => onChangeAccess(game)}
+              style={({ pressed }) => [
+                styles.actionButton,
+                pressed && styles.pressedButton,
+              ]}
+            >
+              <Ionicons color={colors.primary} name="bag-outline" size={21} />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={strings.accessibility.markPlayed}
+              hitSlop={6}
+              onPress={() => onMarkPlayed(game)}
+              style={({ pressed }) => [
+                styles.actionButton,
+                pressed && styles.pressedButton,
+              ]}
+            >
+              <Ionicons color={colors.primary} name="checkmark-done-outline" size={21} />
+            </Pressable>
+          </>
+        )}
         <Pressable
           accessibilityLabel={strings.accessibility.deleteGame}
           hitSlop={6}
@@ -126,7 +128,7 @@ export function GameCard({
             pressed && styles.pressedButton,
           ]}
         >
-          <Ionicons color={colors.destructive} name="trash-outline" size={19} />
+          <Ionicons color={colors.destructive} name="trash-outline" size={21} />
         </Pressable>
       </View>
     </Pressable>
@@ -161,7 +163,7 @@ const styles = StyleSheet.create({
   cover: {
     backgroundColor: colors.panel,
     borderRadius: 6,
-    height: coverHeight,
+    height: 132,
     width: 88,
   },
   coverPlaceholder: {
@@ -183,26 +185,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  // Anchored to the bottom: buying a game removes its "bought it" button, and the
-  // buttons below it must not slide up under the finger that just tapped.
   actions: {
     alignItems: 'center',
     flexDirection: 'column',
     gap: 6,
-    height: coverHeight,
-    justifyContent: 'flex-end',
   },
-  // Darker than the row it sits on, so the buttons read as recessed rather than
-  // disappearing into the list panel.
+  // The accent frame the add button and the active tab already use, so the buttons
+  // read as controls rather than as dim outlines next to the destructive one.
+  // 40x40 is the roomier of the two sizes UI_RULES gives, which suits a 148 tall row.
   actionButton: {
     alignItems: 'center',
-    backgroundColor: colors.panel,
-    borderColor: colors.border,
+    backgroundColor: colors.active,
+    borderColor: colors.activeBorder,
     borderRadius: 8,
     borderWidth: 1,
-    height: 34,
+    height: 40,
     justifyContent: 'center',
-    width: 34,
+    width: 40,
   },
   destructiveActionButton: {
     borderColor: colors.destructiveBorder,

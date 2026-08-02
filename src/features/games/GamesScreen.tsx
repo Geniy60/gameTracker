@@ -33,31 +33,40 @@ type GamesScreenProps = {
   hasLoadError: boolean;
   isLoading: boolean;
   onAddGame: () => void;
+  onChangeAccess: (game: Game) => void;
   onDeleteGame: (game: Game) => void;
   onEditGame: (game: Game) => void;
-  onAction: (game: Game) => void;
+  onMarkPlayed: (game: Game) => void;
   onReorder: (updates: PriorityUpdate[]) => void;
   tab: MainTab;
 };
 
 type GameRowProps = {
   game: Game;
+  onChangeAccess: (game: Game) => void;
   onDelete: (game: Game) => void;
   onEdit: (game: Game) => void;
-  onAction: (game: Game) => void;
+  onMarkPlayed: (game: Game) => void;
 };
 
 // Only the wishlist can be reordered, so only its rows subscribe to the drag gesture.
-function DraggableGameRow({ game, onDelete, onEdit, onAction }: GameRowProps) {
+function DraggableGameRow({
+  game,
+  onChangeAccess,
+  onDelete,
+  onEdit,
+  onMarkPlayed,
+}: GameRowProps) {
   const drag = useReorderableDrag();
 
   return (
     <GameCard
       game={game}
+      onChangeAccess={onChangeAccess}
       onDelete={onDelete}
       onLongPress={drag}
+      onMarkPlayed={onMarkPlayed}
       onPress={onEdit}
-      onAction={onAction}
     />
   );
 }
@@ -67,9 +76,10 @@ export function GamesScreen({
   hasLoadError,
   isLoading,
   onAddGame,
+  onChangeAccess,
   onDeleteGame,
   onEditGame,
-  onAction,
+  onMarkPlayed,
   onReorder,
   tab,
 }: GamesScreenProps) {
@@ -161,16 +171,18 @@ export function GamesScreen({
             tab === 'wishlist' ? (
               <DraggableGameRow
                 game={item}
+                onChangeAccess={onChangeAccess}
                 onDelete={onDeleteGame}
                 onEdit={onEditGame}
-                onAction={onAction}
+                onMarkPlayed={onMarkPlayed}
               />
             ) : (
               <GameCard
                 game={item}
+                onChangeAccess={onChangeAccess}
                 onDelete={onDeleteGame}
+                onMarkPlayed={onMarkPlayed}
                 onPress={onEditGame}
-                onAction={onAction}
               />
             )
           }

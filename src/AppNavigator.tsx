@@ -33,7 +33,16 @@ import {
 } from './services/gamesService';
 import { strings } from './strings';
 import { colors } from './theme/colors';
-import type { Game, MainTab } from './types';
+import type { Game, GameAccess, MainTab } from './types';
+
+// The choices behind the access button on a row, in the order they are offered.
+// "No access" comes last: it is the way back from a wrong tap, not a normal pick.
+const accessChoices: { access: GameAccess | null; label: string }[] = [
+  { access: 'purchased', label: strings.access.purchased },
+  { access: 'subscription', label: strings.access.subscription },
+  { access: 'friend', label: strings.access.friend },
+  { access: null, label: strings.gameForm.accessNone },
+];
 
 const Stack = createStackNavigator<RootStackParamList>();
 const MIN_REFRESH_FEEDBACK_MS = 600;
@@ -171,6 +180,18 @@ function MainStack() {
     }
   }
 
+  // The access button asks instead of acting, so one tap can never set the wrong
+  // kind of ownership, and the same button is how it is corrected later.
+  function chooseAccess(game: Game) {
+    showAppAlert(strings.alerts.accessTitle, game.name, [
+      ...accessChoices.map((choice) => ({
+        text: choice.label,
+        onPress: () => void handleSaveGame({ ...game, access: choice.access }),
+      })),
+      { text: strings.actions.cancel, style: 'cancel' as const },
+    ]);
+  }
+
   function confirmDeleteGame(game: Game) {
     showAppAlert(
       strings.alerts.deleteGameTitle,
@@ -228,7 +249,10 @@ function MainStack() {
                     onEditGame={(game) =>
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
-                    onAction={(game) => void handleSaveGame(game)}
+                    onChangeAccess={chooseAccess}
+                    onMarkPlayed={(game) =>
+                      void handleSaveGame({ ...game, isPlayed: true })
+                    }
                     onReorder={(updates) => void handleReorder(updates)}
                     tab={tab}
                   />

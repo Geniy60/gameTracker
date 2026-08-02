@@ -14,6 +14,9 @@ type TabConfig = {
 
 type MainTabsProps = {
   activeTab: MainTab;
+  // How many games the whole tab holds, not what its quick filter leaves. A number
+  // that moved with the chips would repeat what the list already shows.
+  counts: Record<MainTab, number>;
   onSelectTab: (tab: MainTab) => void;
 };
 
@@ -30,7 +33,7 @@ const tabs: TabConfig[] = [
   },
 ];
 
-export function MainTabs({ activeTab, onSelectTab }: MainTabsProps) {
+export function MainTabs({ activeTab, counts, onSelectTab }: MainTabsProps) {
   return (
     <View style={styles.tabRow}>
       {tabs.map((tab) => {
@@ -60,6 +63,11 @@ export function MainTabs({ activeTab, onSelectTab }: MainTabsProps) {
               style={[styles.tabLabel, isActive && styles.activeTabLabel]}
             >
               {tab.label}
+            </Text>
+            {/* Its own text rather than part of the label: the count is secondary and
+                must stay grey on the active tab too, where the label turns accent. */}
+            <Text numberOfLines={1} style={styles.tabCount}>
+              {counts[tab.key]}
             </Text>
           </Pressable>
         );
@@ -107,6 +115,11 @@ const styles = StyleSheet.create({
   },
   activeTabLabel: {
     color: colors.primary,
+  },
+  tabCount: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: '700',
   },
   pressedButton: {
     opacity: 0.7,

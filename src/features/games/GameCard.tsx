@@ -24,6 +24,8 @@ type GameTag = {
   color: string;
   icon: ComponentProps<typeof Ionicons>['name'];
   label: string;
+  // Drawn beside the icon. Only the rating has one: it is a number, not a state.
+  text?: string;
 };
 
 // One line per property, under the name. Anything the game does not have is left
@@ -34,10 +36,6 @@ function createMetaLines(game: Game): string[] {
 
   if (hasMultiplePlatforms()) {
     lines.push(strings.platforms[game.platform]);
-  }
-
-  if (game.rating !== null) {
-    lines.push(strings.list.ratingValue(game.rating));
   }
 
   if (game.note.length > 0) {
@@ -55,7 +53,22 @@ function createMetaLines(game: Game): string[] {
 // done, amber is something that wants money, grey is a dead end. The accent colour is
 // deliberately not used, since everything else in the app already is it.
 function createTags(game: Game): GameTag[] {
-  const tags: GameTag[] = [createAccessTag(game)];
+  const tags: GameTag[] = [];
+
+  // First, because it is the one thing on a played card the user is looking for.
+  // The star keeps a lone number from being read as anything else. Plain text
+  // colour: an opinion is neither something owned nor something to pay for, which
+  // is all the two coloured marks mean.
+  if (game.rating !== null) {
+    tags.push({
+      color: colors.text,
+      icon: 'star',
+      label: strings.list.ratingValue(game.rating),
+      text: String(game.rating),
+    });
+  }
+
+  tags.push(createAccessTag(game));
 
   // Skipped on the wishlist, where every row would carry the same mark.
   if (game.progress === 'played') {
@@ -176,7 +189,10 @@ export function GameCard({
             >
               {/* The frame stays plain whatever the icon colour, so a tag is not
                   mistaken for the button beside it. */}
-              <Ionicons color={tag.color} name={tag.icon} size={20} />
+              <Ionicons color={tag.color} name={tag.icon} size={tag.text ? 13 : 20} />
+              {tag.text ? (
+                <Text style={[styles.tagText, { color: tag.color }]}>{tag.text}</Text>
+              ) : null}
             </View>
           ))}
         </View>
@@ -255,15 +271,24 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     paddingTop: 8,
   },
+  // Square for the icon-only marks, which minWidth keeps them at, and a touch wider
+  // for the rating, where a number sits beside the star.
   tag: {
     alignItems: 'center',
     backgroundColor: colors.panel,
     borderColor: colors.border,
     borderRadius: 7,
     borderWidth: 1,
+    flexDirection: 'row',
+    gap: 3,
     height: 34,
     justifyContent: 'center',
-    width: 34,
+    minWidth: 34,
+    paddingHorizontal: 6,
+  },
+  tagText: {
+    fontSize: 15,
+    fontWeight: '700',
   },
   // The accent frame the add button and the active tab already use, so the buttons
   // read as controls rather than as dim outlines next to the destructive one.

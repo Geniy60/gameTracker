@@ -87,6 +87,15 @@ function MainStack() {
   const pagerRef = useRef<ScrollView>(null);
   const gamesQuery = useQuery({ queryKey: queryKeys.games, queryFn: loadGames });
   const games = gamesQuery.data ?? [];
+  // Split once: both the pager pages and the tab counters need the same two lists.
+  const gamesByTab: Record<MainTab, Game[]> = {
+    wishlist: selectGamesForTab(games, 'wishlist'),
+    played: selectGamesForTab(games, 'played'),
+  };
+  const tabCounts: Record<MainTab, number> = {
+    wishlist: gamesByTab.wishlist.length,
+    played: gamesByTab.played.length,
+  };
 
   // Tapping a tab jumps the pager. Swiping does the reverse through handlePagerScroll,
   // so the pager is never scrolled programmatically while a drag is in progress.
@@ -197,7 +206,7 @@ function MainStack() {
   // The queue is edited by dragging, which is fine for a nudge and painful across 74
   // rows. This is the one move long enough to be worth naming.
   function moveGameToTop(game: Game) {
-    const wishlist = selectGamesForTab(games, 'wishlist');
+    const wishlist = gamesByTab.wishlist;
     const fromIndex = wishlist.findIndex((candidate) => candidate.id === game.id);
 
     if (fromIndex <= 0) {
@@ -264,7 +273,7 @@ function MainStack() {
       <Stack.Screen name="Home">
         {({ navigation }) => (
           <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safeArea}>
-            <MainTabs activeTab={activeTab} onSelectTab={openTab} />
+            <MainTabs activeTab={activeTab} counts={tabCounts} onSelectTab={openTab} />
             <ScrollView
               horizontal
               onMomentumScrollEnd={handlePagerScroll}
@@ -278,7 +287,7 @@ function MainStack() {
               {tabOrder.map((tab) => (
                 <View key={tab} style={{ width: pageWidth }}>
                   <GamesScreen
-                    games={selectGamesForTab(games, tab)}
+                    games={gamesByTab[tab]}
                     hasLoadError={gamesQuery.isError}
                     isLoading={gamesQuery.isLoading}
                     onAddGame={() =>

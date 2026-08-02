@@ -53,22 +53,33 @@ sections loads its own data; here every tab is a filter over one already loaded 
 lazy mounting would add code without saving work. One consequence is that each tab keeps its
 own search text and filter.
 
+Each tab name carries the size of its tab beside it, counting the whole tab rather than what
+its quick filter leaves.
+
 All tabs share the same screen component and show a search row, an add button, and a list of
-games. Tapping a row opens the edit screen; the trash button deletes after a confirmation
-dialog.
+games. Tapping a row opens the edit screen; the row menu deletes after a confirmation dialog.
+
+The wishlist toolbar also holds a dice, which answers "what do I play now" with one game
+drawn from those that have access. It ignores the search and the chips on purpose: the
+answer should not depend on what is on screen. The result is a window with the cover drawn
+large and `Ещё раз` / `Открыть`, and a re-roll never returns the game already showing. This
+is a window rather than the screen `UI_RULES.md` asks for previews to be, because the whole
+interaction is roll, look, roll again.
 
 Every row starts with an 88x132 cover picture on the left, followed by a column holding the
-name and one line per property the game actually has: rating and the note.
+name and the note, which is the only property still written as a line of text.
 
-Access and progress are not lines but marks along the foot of that column: framed 34x34
-icons, no text. They are short closed sets, so an icon is read at a glance where a fourth and
+Rating, access and progress are not lines but marks along the foot of that column: framed
+34x34 icons, the rating one a little wider for the number beside its star. They are short closed sets, so an icon is read at a glance where a fourth and
 fifth line of grey text had to be read word by word. Access always has a mark. A game with
 none gets a dollar sign on the wishlist, where it means `Купить`, and a padlock on the played
 tab, where it means `Нет доступа` and telling the user to buy something they have finished
 would make no sense. Progress is marked only once it leaves `none`, a controller for started
 and a trophy for finished; on the wishlist every row would otherwise carry the same mark.
-Each icon carries its Russian label for the screen reader, which cannot see it. The note
-comes last, being the only free text. The cover is deliberately large: the wishlist is meant
+The rating comes first, being what a played card is usually read for, and keeps the plain
+text colour: the two colours mean something owned and something that wants money, and an
+opinion is neither. Each icon carries its Russian label for the screen reader, which cannot
+see it. The note is above them all, being the only free text. The cover is deliberately large: the wishlist is meant
 to read as a shelf of games rather than a dense table, which is worth the taller rows. Row
 content is top aligned and the action buttons stack in a column on the right, because a short
 block of text centred beside a tall cover reads as unfinished. Covers are drawn with `expo-image` rather than the React Native
@@ -221,6 +232,40 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Added tab counters, a random game roll, and a rating mark on the card.
+
+Details:
+
+- The tab row now carries the size of each tab beside its name. The number counts
+  the whole tab rather than what its quick filter leaves: a count that moved with
+  the chips would only repeat what the list on screen already says. It is its own
+  grey text rather than part of the label, so it stays secondary on the active tab
+  where the label turns accent. `AppNavigator` splits the games once now and feeds
+  both the pager pages and the counters from the same two lists.
+- A dice button sits between the search field and the add button, on the wishlist
+  only. It draws from the games that have access, since a game still to be bought
+  cannot be started tonight, and it ignores the search and the chips: what to play
+  now does not depend on what happens to be on screen. With no owned game at all it
+  says so in a dialog instead of opening an empty window.
+- The result is a window with the cover drawn large, the name, how the game is
+  reachable, and `Ещё раз` / `Открыть` / `Закрыть`. `UI_RULES.md` asks for previews
+  to be screens; this one is deliberately a window, because the whole interaction is
+  roll, look, roll again, and a navigation screen would be more machinery for the
+  same thing. It is styled after `AppAlertHost` rather than sharing it: the alert
+  host holds one config of title, message and buttons, and a picture is not that.
+- A re-roll never returns the game already on screen unless it is the only candidate.
+- The rating left the grey metadata lines and became the first mark in the row along
+  the foot of the card, a star with the number beside it. It was one grey line among
+  others while being the one thing a played card is usually read for. The star is
+  what keeps a lone number from being read as something else.
+- The mark keeps the plain text colour. The two colours in the palette mean
+  something the user has and something that wants money; an opinion is neither, the
+  same reason `Играл` is plain.
+- Marks were square by a fixed width; they now hold that as a minimum with side
+  padding, so the icon-only ones are unchanged and the rating one is a little wider.
+
+Previous step:
 
 Started the third APK build, version code 4.
 
@@ -732,10 +777,20 @@ Use the wishlist now that it holds 72 games, and see what the manual order needs
 row is the only way to reorder, and nothing on a card says it can be dragged; with a list
 this long that question is finally answerable rather than theoretical.
 
-Open afterwards:
+Open afterwards, from a review of the whole project:
 
+- A grid view of covers, three to a row, as a second way of looking at the same list. The
+  app already calls itself a shelf, and a grid shows twelve games where the list shows four.
+  Dragging does not follow into a grid, so the order would still be edited in the list.
+- Reordering writes one request per row that moved, so a move from the bottom of 74 rows is
+  74 parallel updates and is not atomic. A Postgres function taking the whole array would
+  make it one call. Nothing has gone wrong yet, which is why this is a note and not a step.
+- Access and progress changed from the row menu go through a full save and a refetch, so the
+  mark changes a moment later. An optimistic cache write is a few lines.
+- Search matches the name only, not the note.
 - Whether the long press needs a visible drag handle, since nothing on a row hints that it
-  can be dragged.
+  can be dragged. The queue position printed on the card would hint at it and is useful on
+  its own.
 - Whether the covers should be copied into Supabase Storage instead of pointing at the
   SteamGridDB CDN. All 93 come to around 5 MB. A dead link now falls back to the
   placeholder, so this is about keeping the pictures, not about looking broken. Deferred:

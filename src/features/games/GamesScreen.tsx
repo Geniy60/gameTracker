@@ -7,6 +7,7 @@ import ReorderableList, {
   useReorderableDrag,
 } from 'react-native-reorderable-list';
 
+import { showAppAlert } from '../../appAlert';
 import { EmptyState } from '../../components/EmptyState';
 import { OptionChips } from '../../components/OptionChips';
 import { SearchInput } from '../../components/SearchInput';
@@ -16,6 +17,7 @@ import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
 import type { Game, MainTab, PlayedFilter, WishlistFilter } from '../../types';
 import { GameCard } from './GameCard';
+import { RandomGameDialog } from './RandomGameDialog';
 
 // The library scales a dragged row up by default, which pushes its edges past the
 // list bounds. Android clips there, so the side borders and rounded corners get cut
@@ -51,6 +53,17 @@ type GameRowProps = {
   onOpenActions: (game: Game) => void;
 };
 
+// Rolling the same game twice in a row is the one result that feels broken, so the
+// game on screen is left out of the draw whenever there is anything else to pick.
+function pickRandomGame(candidates: Game[], previous: Game | null): Game | null {
+  const pool =
+    previous === null || candidates.length === 1
+      ? candidates
+      : candidates.filter((candidate) => candidate.id !== previous.id);
+
+  return pool[Math.floor(Math.random() * pool.length)] ?? null;
+}
+
 // Only the wishlist can be reordered, so only its rows subscribe to the drag gesture.
 function DraggableGameRow({ game, onEdit, onOpenActions }: GameRowProps) {
   const drag = useReorderableDrag();
@@ -78,6 +91,7 @@ export function GamesScreen({
   const [searchText, setSearchText] = useState('');
   const [wishlistFilter, setWishlistFilter] = useState<WishlistFilter>('all');
   const [playedFilter, setPlayedFilter] = useState<PlayedFilter>('all');
+  const [randomGame, setRandomGame] = useState<Game | null>(null);
   // The list sits inside the horizontal tab pager. The library's default drag gesture
   // has no axis limit and swallows the sideways swipe that changes tabs, so it is
   // replaced with one that only reacts to vertical movement. Memoized because the
@@ -113,6 +127,26 @@ export function GamesScreen({
     onReorder(reorderPriorities(visibleGames, from, to));
   }
 
+  // Draws from the whole wishlist, ignoring the search and the chips: the answer to
+  // "what do I play now" should not depend on what happens to be on screen. Only
+  // games with access take part, since a game that still has to be bought cannot be
+  // started tonight.
+  function rollRandomGame() {
+    const candidates = games.filter((game) => game.access !== null);
+
+    if (candidates.length === 0) {
+      showAppAlert(strings.randomGame.emptyTitle, strings.randomGame.emptyMessage);
+      return;
+    }
+
+    setRandomGame((previous) => pickRandomGame(candidates, previous));
+  }
+
+  function openRandomGame(game: Game) {
+    setRandomGame(null);
+    onEditGame(game);
+  }
+
   return (
     <View style={styles.screen}>
       <View style={styles.toolbar}>
@@ -121,10 +155,23 @@ export function GamesScreen({
           placeholder={strings.search.games}
           value={searchText}
         />
+        {/* The wishlist only: on the played tab there is nothing left to choose. */}
+        {tab === 'wishlist' ? (
+          <Pressable
+            accessibilityLabel={strings.accessibility.pickRandomGame}
+            onPress={rollRandomGame}
+            style={({ pressed }) => [
+              styles.toolbarButton,
+              pressed && styles.pressedButton,
+            ]}
+          >
+            <Ionicons color={colors.primary} name="dice-outline" size={24} />
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityLabel={strings.accessibility.addGame}
           onPress={onAddGame}
-          style={({ pressed }) => [styles.addButton, pressed && styles.pressedButton]}
+          style={({ pressed }) => [styles.toolbarButton, pressed && styles.pressedButton]}
         >
           <Ionicons color={colors.primary} name="add" size={26} />
         </Pressable>
@@ -194,6 +241,12 @@ export function GamesScreen({
           style={styles.list}
         />
       )}
+      <RandomGameDialog
+        game={randomGame}
+        onClose={() => setRandomGame(null)}
+        onOpen={openRandomGame}
+        onReroll={rollRandomGame}
+      />
     </View>
   );
 }
@@ -209,7 +262,9 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 12,
   },
-  addButton: {
+  // The 44x44 accent frame every control in the app wears, shared by the add button
+  // and the dice beside it.
+  toolbarButton: {
     alignItems: 'center',
     backgroundColor: colors.active,
     borderColor: colors.activeBorder,

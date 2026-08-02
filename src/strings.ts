@@ -49,6 +49,14 @@ export const strings = {
     resetFilters: 'Сбросить',
     save: 'Сохранить',
   },
+  randomGame: {
+    title: 'Во что поиграть',
+    emptyTitle: 'Не из чего выбирать',
+    emptyMessage: 'В списке нет игр, к которым уже есть доступ.',
+    reroll: 'Ещё раз',
+    open: 'Открыть',
+    close: 'Закрыть',
+  },
   gameForm: {
     addTitle: 'Новая игра',
     editTitle: 'Редактирование игры',
@@ -84,6 +92,7 @@ export const strings = {
     back: 'Назад',
     clearSearch: 'Очистить поиск',
     pickCover: 'Подобрать обложку',
+    pickRandomGame: 'Случайная игра',
     rowActions: 'Действия с игрой',
     search: 'Поиск',
   },

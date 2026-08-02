@@ -211,6 +211,26 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Filled the wishlist from store screenshots.
+
+Details:
+
+- 72 games were read off eleven PlayStation Store screenshots and inserted with
+  `progress = 'none'` and no access, then `npm run import:covers` found 71 covers.
+  Only `The Last Shot` has none; the name is too generic for the search.
+- Store bundles were split into the games they hold, and cross-generation titles lost
+  their `PS4 & PS5` tails. Editions were dropped from three names so the cover lookup
+  had something to find: `FINAL FANTASY XV ROYAL EDITION`, `Bloodborne: Game of the
+  Year Edition` and `NieR: Automata Game of the YoRHa Edition`.
+- Nothing collided with the played tab. The two near misses were `Hollow Knight:
+  Silksong` against `Hollow knight` and `FINAL FANTASY XV` against `FINAL FANTASY XVI`,
+  which are different games.
+- Add-ons were left out rather than guessed at: the Erdtree edition of a finished
+  `ELDEN RING`, `Lies of P: Overture`, and the Cuphead expansion.
+- The table now holds 165 games, 72 of them in the wishlist.
+
+Previous step:
+
 Added the progress filter to the played tab.
 
 Details:
@@ -617,10 +637,9 @@ Details:
 
 ## Next Proposed Step
 
-Put some games into the wishlist. Every game in the table is a played one, so the tab the
-app was built around is empty and its manual order, its drag handle question and its
-ownership filter are all running on nothing. What needs fixing there cannot be judged until
-it holds real entries.
+Use the wishlist now that it holds 72 games, and see what the manual order needs. Dragging a
+row is the only way to reorder, and nothing on a card says it can be dragged; with a list
+this long that question is finally answerable rather than theoretical.
 
 Open afterwards:
 

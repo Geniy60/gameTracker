@@ -20,7 +20,11 @@ type GameCardProps = {
 // reordered. Short enough to react quickly, long enough not to fire on a tap.
 const dragHoldDelayMs = 220;
 
-type GameTag = { icon: ComponentProps<typeof Ionicons>['name']; label: string };
+type GameTag = {
+  color: string;
+  icon: ComponentProps<typeof Ionicons>['name'];
+  label: string;
+};
 
 // One line per property, under the name. Anything the game does not have is left
 // out, as is metadata that every row in the current tab would repeat. The note goes
@@ -46,16 +50,28 @@ function createMetaLines(game: Game): string[] {
 // Access and progress are short closed sets, so they read faster as marks along the
 // bottom than as two more lines of text competing with the note. The label is kept
 // for the screen reader, which cannot see the icon.
+//
+// The colour carries one rule and only one: green is something the user has or has
+// done, amber is something that wants money, grey is a dead end. The accent colour is
+// deliberately not used, since everything else in the app already is it.
 function createTags(game: Game): GameTag[] {
   const tags: GameTag[] = [createAccessTag(game)];
 
   // Skipped on the wishlist, where every row would carry the same mark.
   if (game.progress === 'played') {
-    tags.push({ icon: 'game-controller-outline', label: strings.progress.played });
+    tags.push({
+      color: colors.text,
+      icon: 'game-controller-outline',
+      label: strings.progress.played,
+    });
   }
 
   if (game.progress === 'finished') {
-    tags.push({ icon: 'trophy-outline', label: strings.progress.finished });
+    tags.push({
+      color: colors.positive,
+      icon: 'trophy-outline',
+      label: strings.progress.finished,
+    });
   }
 
   return tags;
@@ -63,25 +79,41 @@ function createTags(game: Game): GameTag[] {
 
 function createAccessTag(game: Game): GameTag {
   if (game.access === 'purchased') {
-    return { icon: 'bag-check-outline', label: strings.access.purchased };
+    return {
+      color: colors.positive,
+      icon: 'bag-check-outline',
+      label: strings.access.purchased,
+    };
   }
 
   if (game.access === 'subscription') {
-    return { icon: 'repeat-outline', label: strings.access.subscription };
+    return {
+      color: colors.positive,
+      icon: 'repeat-outline',
+      label: strings.access.subscription,
+    };
   }
 
   if (game.access === 'friend') {
-    return { icon: 'people-outline', label: strings.access.friend };
+    return {
+      color: colors.positive,
+      icon: 'people-outline',
+      label: strings.access.friend,
+    };
   }
 
-  // The same fact reads differently by tab, so the mark does too: a price tag for
-  // something still to buy on the wishlist, a padlock for a game that has been played
-  // and is no longer reachable, where telling the user to buy it would make no sense.
+  // The same fact reads differently by tab, so the mark does too: money still to spend
+  // on the wishlist, and on the played tab a game simply out of reach, where telling
+  // the user to buy something they have finished would make no sense.
   if (game.progress === 'none') {
-    return { icon: 'logo-usd', label: strings.list.toBuyMark };
+    return { color: colors.attention, icon: 'logo-usd', label: strings.list.toBuyMark };
   }
 
-  return { icon: 'lock-closed-outline', label: strings.list.noAccessMark };
+  return {
+    color: colors.muted,
+    icon: 'lock-closed-outline',
+    label: strings.list.noAccessMark,
+  };
 }
 
 export function GameCard({
@@ -140,10 +172,9 @@ export function GameCard({
               key={tag.icon}
               style={styles.tag}
             >
-              {/* The accent colour, not the muted one the meta lines use: a grey icon
-                  on the dark tag was another shade of the same grey. The frame stays
-                  plain, so a tag is still not mistaken for the button beside it. */}
-              <Ionicons color={colors.primary} name={tag.icon} size={20} />
+              {/* The frame stays plain whatever the icon colour, so a tag is not
+                  mistaken for the button beside it. */}
+              <Ionicons color={tag.color} name={tag.icon} size={20} />
             </View>
           ))}
         </View>

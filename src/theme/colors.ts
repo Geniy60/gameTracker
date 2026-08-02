@@ -11,6 +11,10 @@ export type AppColors = {
   primary: string;
   destructive: string;
   destructiveBorder: string;
+  // Card marks only. Everything else in the app is the one accent colour, which is
+  // exactly why the marks cannot use it: they would disappear into it.
+  positive: string;
+  attention: string;
 };
 
 export const colors: AppColors = {
@@ -26,4 +30,6 @@ export const colors: AppColors = {
   primary: '#A78BFA',
   destructive: '#FF8585',
   destructiveBorder: '#B85555',
+  positive: '#6FD39B',
+  attention: '#F0B45C',
 };

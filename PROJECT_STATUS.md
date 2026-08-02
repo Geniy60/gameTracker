@@ -191,6 +191,23 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
+Drew the app icon and the splash artwork.
+
+Details:
+
+- A gamepad in the app palette, generated from an SVG rather than hand drawn, so it can
+  be regenerated at any size. The generator lives outside the repository; the rendered
+  PNGs in `assets/` are the artifact.
+- The full Android adaptive set as in Fridge: foreground, background and monochrome, plus
+  a square `icon.png` and `splash-icon.png`.
+- All artwork sits inside the central 66% circle Android guarantees to show, the furthest
+  point being 288 of the 338 allowed, so no launcher mask clips it. Checked against
+  circular and rounded masks and down to 48 pixels.
+- The splash uses the legacy `expo.splash` key rather than the `expo-splash-screen`
+  plugin, matching GymBro on the same SDK and avoiding a new dependency.
+
+Previous step:
+
 Added title suggestions to the game form.
 
 Details:
@@ -398,11 +415,11 @@ Details:
 
 Build an installable APK. The app has only ever run through Expo Go, which means the
 development tunnel has to be running on the computer for it to be usable at all. This needs
-`npx eas-cli init` first, since the project is not linked to EAS.
+`npx eas-cli init` first, since the project is not linked to EAS. The icon and splash are in
+place now, so the build would carry them.
 
-Open afterwards: an icon and splash screen, which need an image from the user rather than a
-drawn replacement. Also open is whether the long press needs a visible drag handle, since
-nothing on a row hints that it can be dragged.
+Open afterwards: whether the long press needs a visible drag handle, since nothing on a row
+hints that it can be dragged.
 
 ## Important Decisions And Open Questions
 

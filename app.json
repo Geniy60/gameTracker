@@ -5,13 +5,25 @@
     "slug": "gametracker",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#12141C"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "package": "com.evgeniy.gametracker",
       "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#12141C",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
       "predictiveBackGestureEnabled": false
     }
   }

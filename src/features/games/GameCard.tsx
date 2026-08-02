@@ -30,8 +30,9 @@ const quickStepIcons: Record<
   markPlayed: 'checkmark-done-outline',
 };
 
-// One line per property, under the name. Metadata that every row in the current tab
-// would repeat is left out.
+// One line per property, under the name. Anything the game does not have is left
+// out, as is metadata that every row in the current tab would repeat. The note goes
+// last because it is the only free text and can run onto a second line.
 function createMetaLines(game: Game): string[] {
   const lines: string[] = [];
 
@@ -45,6 +46,10 @@ function createMetaLines(game: Game): string[] {
 
   if (game.rating !== null) {
     lines.push(strings.list.ratingValue(game.rating));
+  }
+
+  if (game.note.length > 0) {
+    lines.push(game.note);
   }
 
   return lines;
@@ -80,8 +85,10 @@ export function GameCard({
         <Text numberOfLines={2} style={styles.name}>
           {game.name}
         </Text>
-        {metaLines.map((line) => (
-          <Text key={line} numberOfLines={1} style={styles.meta}>
+        {metaLines.map((line, index) => (
+          // Index keys: the lines are derived fresh from the game every render and
+          // two of them can hold the same text.
+          <Text key={index} numberOfLines={1} style={styles.meta}>
             {line}
           </Text>
         ))}
@@ -124,8 +131,10 @@ export function GameCard({
 const styles = StyleSheet.create({
   // Each row is its own framed element, like a GymBro tile, just denser. A list of
   // one then looks like one element instead of a mostly empty container.
+  // Top aligned rather than centred: next to a 132 tall cover, three short lines
+  // floating in the middle read as unfinished.
   row: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: colors.subtleBackground,
     borderColor: colors.border,
     borderRadius: 8,
@@ -171,7 +180,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     alignItems: 'center',
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 6,
   },
   // Darker than the row it sits on, so the buttons read as recessed rather than

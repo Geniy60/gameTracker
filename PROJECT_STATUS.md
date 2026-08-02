@@ -44,8 +44,11 @@ games. Tapping a row opens the edit screen; the trash button deletes after a con
 dialog.
 
 Every row starts with an 88x132 cover picture on the left, followed by a column holding the
-name and one line per property. The cover is deliberately large: the wishlist is meant to
-read as a shelf of games rather than a dense table, which is worth the taller rows. Covers are drawn with `expo-image` rather than the React Native
+name and one line per property the game actually has: access, rating, and the note. The note
+comes last, being the only free text. The cover is deliberately large: the wishlist is meant
+to read as a shelf of games rather than a dense table, which is worth the taller rows. Row
+content is top aligned and the action buttons stack in a column on the right, because a short
+block of text centred beside a tall cover reads as unfinished. Covers are drawn with `expo-image` rather than the React Native
 `Image`, because it keeps its own disk cache and scrolling the list must not refetch
 anything. A game without a cover shows a placeholder, which keeps row heights even.
 

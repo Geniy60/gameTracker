@@ -71,6 +71,12 @@ The wishlist order is edited by dragging a row after a long press, using
 the end of the queue, so a fresh idea does not push aside what the user already decided to
 play next.
 
+The list runs a custom pan gesture limited to the vertical axis. The library's default one
+has no axis limit and swallowed the sideways swipe that changes tabs, since the list is
+nested inside the horizontal pager. Dragging is also disabled outright on the played tab.
+The long press delay is shortened from the React Native default of 500 ms, which felt
+sluggish for the main way of reordering the list.
+
 Dragging happens inside the list the user sees, which the ownership filter and the search box
 can narrow. `reorderPriorities` in `src/gameOrder.ts` therefore reuses the priority values the
 visible games already occupy instead of renumbering everything, which leaves every hidden game
@@ -249,9 +255,9 @@ Details:
 
 ## Next Proposed Step
 
-Manual verification on the phone through Expo Go, with the drag gesture as the main risk: the
-reorderable list is nested inside the horizontal tab pager, and the two gestures could fight.
-Also worth checking whether a long press is discoverable enough without a drag handle.
+Open. The wishlist rework is verified on the phone, including the drag gesture and the tab
+swipe. Worth deciding whether the long press needs a visible drag handle, since nothing on a
+row hints that it can be dragged.
 
 ## Important Decisions And Open Questions
 

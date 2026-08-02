@@ -18,6 +18,10 @@ type GameCardProps = {
   tab: MainTab;
 };
 
+// The default 500 ms feels sluggish when the long press is how the wishlist is
+// reordered. Short enough to react quickly, long enough not to fire on a tap.
+const dragHoldDelayMs = 220;
+
 const quickStepIcons: Record<
   QuickStepKind,
   ComponentProps<typeof Ionicons>['name']
@@ -62,6 +66,7 @@ export function GameCard({
 
   return (
     <Pressable
+      delayLongPress={dragHoldDelayMs}
       onLongPress={onLongPress}
       onPress={() => onPress(game)}
       style={({ pressed }) => [styles.row, pressed && styles.pressedRow]}

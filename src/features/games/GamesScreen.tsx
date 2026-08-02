@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
 import ReorderableList, {
   type ReorderableListReorderEvent,
   useReorderableDrag,
@@ -71,6 +72,14 @@ export function GamesScreen({
 }: GamesScreenProps) {
   const [searchText, setSearchText] = useState('');
   const [wishlistFilter, setWishlistFilter] = useState<WishlistFilter>('all');
+  // The list sits inside the horizontal tab pager. The library's default drag gesture
+  // has no axis limit and swallows the sideways swipe that changes tabs, so it is
+  // replaced with one that only reacts to vertical movement. Memoized because the
+  // library rebuilds its handlers whenever this object changes identity.
+  const dragGesture = useMemo(
+    () => Gesture.Pan().activeOffsetY([-10, 10]).failOffsetX([-10, 10]),
+    [],
+  );
   const normalizedSearch = searchText.trim().toLowerCase();
   // The ownership filter belongs to the wishlist only; the played tab ignores it.
   const activeFilter: WishlistFilter = tab === 'wishlist' ? wishlistFilter : 'all';
@@ -139,9 +148,11 @@ export function GamesScreen({
         <ReorderableList
           contentContainerStyle={styles.listContent}
           data={visibleGames}
+          dragEnabled={tab === 'wishlist'}
           keyExtractor={(game) => game.id}
           keyboardShouldPersistTaps="handled"
           onReorder={handleReorder}
+          panGesture={dragGesture}
           renderItem={({ item }) =>
             tab === 'wishlist' ? (
               <DraggableGameRow

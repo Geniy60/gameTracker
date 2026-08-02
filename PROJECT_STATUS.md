@@ -199,6 +199,21 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Fell back to the placeholder when a cover address stops working.
+
+Details:
+
+- The pictures sit on the SteamGridDB CDN and are community uploaded, so an address
+  can die. The card only checked for a null `cover_url`, so a dead link left a hole in
+  the row rather than the placeholder that a game without a cover gets.
+- `GameCard` remembers the address that failed rather than setting a flag. A new cover
+  for the same game then draws normally, with nothing to reset: the card is reused as
+  the list scrolls, and a boolean would have kept showing the placeholder.
+- Nothing is written to the database. A dead address stays in the row, so the next
+  fill script or a save from the form can still replace it.
+
+Previous step:
+
 Made the cover fixable by hand: a picker of candidates and a plain URL field.
 
 Details:
@@ -518,18 +533,19 @@ Details:
 
 ## Next Proposed Step
 
-Check the cover picker on the phone, and the imported list along with it. 93 games is the
-first time the app holds a real amount of data, so this is where a slow list or a name that
-does not fit the row will actually show up.
+Put some games into the wishlist. Every game in the table is a played one, so the tab the
+app was built around is empty and its manual order, its drag handle question and its
+ownership filter are all running on nothing. What needs fixing there cannot be judged until
+it holds real entries.
 
 Open afterwards:
 
 - Whether the long press needs a visible drag handle, since nothing on a row hints that it
   can be dragged.
-- Whether a dead cover address should fall back to the placeholder. The card shows the
-  placeholder only when `cover_url` is null, so a link that stops working leaves a hole in
-  the row instead. The pictures sit on the SteamGridDB CDN and are community uploaded, so
-  this is possible; how likely is unknown.
+- Whether the covers should be copied into Supabase Storage instead of pointing at the
+  SteamGridDB CDN. All 93 come to around 5 MB. A dead link now falls back to the
+  placeholder, so this is about keeping the pictures, not about looking broken. Deferred:
+  it means a bucket, its policies and another script, and no link has died yet.
 
 ## Important Decisions And Open Questions
 

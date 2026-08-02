@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { hasMultiplePlatforms } from '../../gamePlatforms';
@@ -59,6 +60,11 @@ export function GameCard({
   onPress,
 }: GameCardProps) {
   const metaLines = createMetaLines(game);
+  // The covers sit on someone else's CDN and are community uploaded, so an address
+  // can stop working. The failed address is remembered rather than a flag: a new
+  // cover for the same game then draws normally, without anything having to reset.
+  const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
+  const hasCover = game.coverUrl !== null && game.coverUrl !== failedCoverUrl;
 
   return (
     <Pressable
@@ -67,14 +73,19 @@ export function GameCard({
       onPress={() => onPress(game)}
       style={({ pressed }) => [styles.row, pressed && styles.pressedRow]}
     >
-      {game.coverUrl === null ? (
+      {hasCover ? (
+        // expo-image keeps the picture in its own disk cache, so scrolling the list
+        // does not refetch it.
+        <Image
+          contentFit="cover"
+          onError={() => setFailedCoverUrl(game.coverUrl)}
+          source={game.coverUrl}
+          style={styles.cover}
+        />
+      ) : (
         <View style={[styles.cover, styles.coverPlaceholder]}>
           <Ionicons color={colors.muted} name="game-controller-outline" size={34} />
         </View>
-      ) : (
-        // expo-image keeps the picture in its own disk cache, so scrolling the list
-        // does not refetch it.
-        <Image contentFit="cover" source={game.coverUrl} style={styles.cover} />
       )}
       <View style={styles.info}>
         <Text numberOfLines={2} style={styles.name}>

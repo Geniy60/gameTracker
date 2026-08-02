@@ -119,17 +119,23 @@ Rows use `subtleBackground`; `panel` and `surface` both sit too close to the app
 to read as separate elements. Row action buttons use the darker `panel` so they stay visible
 against the row.
 
-An unplayed game carries two buttons above the delete one, and neither ever moves or changes
-meaning. The access button opens a dialog offering bought, subscription, at a friend's, and
-no access at all; it stays after a purchase, because it is also how the kind of ownership is
-corrected later. The progress button opens the same kind of dialog, offering played and
-finished. Asking rather than guessing also serves as the confirmation this action needs,
-since it is the one row action that takes the game out of the list being looked at. A game
-that is no longer in the wishlist has neither button, only delete.
+Every row carries one button, an ellipsis, which opens a menu of that game's actions:
+`В начало очереди` on the wishlist only, then `Доступ`, `Прогресс` and `Удалить`. Access and
+progress open a second dialog with their own choices, which the alert host handles by
+swapping its contents rather than stacking a modal.
 
-This replaced a single button that derived "the one next move" and changed meaning after each
-tap, so two taps in the same spot did two different things and the second one made the game
-disappear. `src/gameActions.ts` existed only to make that guess and was deleted with it.
+The buttons used to sit on the card itself, up to three of them. At 74 games three accent
+frames beside every cover read as a control panel rather than a shelf, and a fourth action
+would have pushed the row taller than its own cover. Every one of them is rare enough to
+live a tap away, and delete being harder to hit by accident is a bonus rather than a cost.
+
+Hiding them is not a return to the quick-step button that was deleted early on. That one
+guessed at "the one next move" and changed meaning after each tap; a menu names every entry.
+
+`В начало очереди` exists because dragging is the only way to reorder, and a drag from the
+bottom of 74 rows is a long one. It reuses `reorderPriorities`, so it consumes no new
+priority values, and unlike dragging it stays available while the list is filtered: the
+destination is unambiguous no matter what is on screen.
 
 Row buttons wear the same accent frame as the add button and the active tab, at the 40x40
 UI_RULES gives for roomier cards. The dim outline they had before made them read as smaller
@@ -210,6 +216,26 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Moved every row action into one menu behind an ellipsis.
+
+Details:
+
+- Both tabs now show a single button per row. The wishlist menu holds `В начало
+  очереди`, `Доступ`, `Прогресс` and `Удалить`; the played tab holds the same without
+  the first, since it is sorted by name and priority means nothing there.
+- The played tab gained something in the process: access and progress were reachable
+  only through the form there, and are now two taps from the list.
+- `В начало очереди` is the reason this came up. Four buttons would have made the row
+  taller than its cover, and the queue needed a way to move a game that did not involve
+  dragging it past 70 rows.
+- Nested dialogs work because `AppAlertHost` holds one config and replaces it: closing
+  sets it to null and the handler sets the next one in the same batch, so the window
+  swaps its contents instead of closing.
+- Deleted the accessibility labels of the three buttons that no longer exist, and the
+  `actions` and `destructiveActionButton` styles with them.
+
+Previous step:
 
 Pinned the save button to the bottom of the form.
 

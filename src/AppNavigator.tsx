@@ -13,13 +13,13 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-import { showAppAlert } from './appAlert';
+import { type AppAlertButton, showAppAlert } from './appAlert';
 import { AppAlertHost } from './components/AppAlertHost';
 import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
 import { GamesScreen } from './features/games/GamesScreen';
 import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilters';
-import { nextPriority, type PriorityUpdate } from './gameOrder';
+import { nextPriority, reorderPriorities, type PriorityUpdate } from './gameOrder';
 import type { RootStackParamList } from './navigationTypes';
 import { invalidateGameQueries, queryKeys } from './queryClient';
 import { findCoverUrl } from './services/steamGridDb';
@@ -43,8 +43,8 @@ const accessChoices: { access: GameAccess | null; label: string }[] = [
   { access: null, label: strings.gameForm.accessNone },
 ];
 
-// The two states a wishlist game can move to. 'none' is not offered: this button
-// only ever takes a game out of the wishlist.
+// 'none' is not offered: this entry moves a game forward or corrects which of the two
+// states it reached. Sending a game back to the wishlist is a decision for the form.
 const progressChoices: { label: string; progress: GameProgress }[] = [
   { progress: 'played', label: strings.progress.played },
   { progress: 'finished', label: strings.progress.finished },
@@ -166,8 +166,49 @@ function MainStack() {
     }
   }
 
-  // The access button asks instead of acting, so one tap can never set the wrong
-  // kind of ownership, and the same button is how it is corrected later.
+  // Every row action lives here rather than as its own button on the card. Nothing is
+  // guessed: each entry says what it does, which is what the deleted quick-step button
+  // failed to do. Moving to the top is offered on the wishlist only, since the played
+  // tab is sorted by name and priority means nothing there.
+  function openRowActions(game: Game) {
+    const buttons: AppAlertButton[] = [];
+
+    if (game.progress === 'none') {
+      buttons.push({
+        text: strings.actions.moveToTop,
+        onPress: () => moveGameToTop(game),
+      });
+    }
+
+    buttons.push(
+      { text: strings.actions.access, onPress: () => chooseAccess(game) },
+      { text: strings.actions.progress, onPress: () => chooseProgress(game) },
+      {
+        text: strings.actions.delete,
+        style: 'destructive',
+        onPress: () => confirmDeleteGame(game),
+      },
+      { text: strings.actions.cancel, style: 'cancel' },
+    );
+
+    showAppAlert(game.name, undefined, buttons);
+  }
+
+  // The queue is edited by dragging, which is fine for a nudge and painful across 74
+  // rows. This is the one move long enough to be worth naming.
+  function moveGameToTop(game: Game) {
+    const wishlist = selectGamesForTab(games, 'wishlist');
+    const fromIndex = wishlist.findIndex((candidate) => candidate.id === game.id);
+
+    if (fromIndex <= 0) {
+      return;
+    }
+
+    void handleReorder(reorderPriorities(wishlist, fromIndex, 0));
+  }
+
+  // Asks instead of acting, so one tap can never set the wrong kind of ownership, and
+  // the same entry is how it is corrected later.
   function chooseAccess(game: Game) {
     showAppAlert(strings.alerts.accessTitle, game.name, [
       ...accessChoices.map((choice) => ({
@@ -178,9 +219,9 @@ function MainStack() {
     ]);
   }
 
-  // Asks which of the two states the game reached rather than guessing, and the
-  // question doubles as the confirmation this action needs: it is the one row action
-  // that takes the game out of the list the user is looking at.
+  // Asks which of the two states the game reached rather than guessing. On the
+  // wishlist the question doubles as the confirmation this move needs, since it takes
+  // the game out of the list being looked at.
   function chooseProgress(game: Game) {
     showAppAlert(strings.alerts.progressTitle, game.name, [
       ...progressChoices.map((choice) => ({
@@ -243,12 +284,10 @@ function MainStack() {
                     onAddGame={() =>
                       navigation.navigate('GameForm', { game: null, sourceTab: tab })
                     }
-                    onDeleteGame={confirmDeleteGame}
                     onEditGame={(game) =>
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
-                    onChangeAccess={chooseAccess}
-                    onChooseProgress={chooseProgress}
+                    onOpenActions={openRowActions}
                     onReorder={(updates) => void handleReorder(updates)}
                     tab={tab}
                   />

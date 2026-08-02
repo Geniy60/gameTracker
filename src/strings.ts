@@ -40,8 +40,11 @@ export const strings = {
     },
   } satisfies Record<MainTab | 'filtered', { message: string; title: string }>,
   actions: {
+    access: 'Доступ',
     cancel: 'Отмена',
     delete: 'Удалить',
+    moveToTop: 'В начало очереди',
+    progress: 'Прогресс',
     ok: 'ОК',
     resetFilters: 'Сбросить',
     save: 'Сохранить',
@@ -79,11 +82,9 @@ export const strings = {
   accessibility: {
     addGame: 'Добавить игру',
     back: 'Назад',
-    changeAccess: 'Изменить доступ к игре',
     clearSearch: 'Очистить поиск',
     pickCover: 'Подобрать обложку',
-    deleteGame: 'Удалить игру',
-    chooseProgress: 'Отметить прогресс',
+    rowActions: 'Действия с игрой',
     search: 'Поиск',
   },
   alerts: {

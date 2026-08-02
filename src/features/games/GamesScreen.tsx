@@ -39,39 +39,27 @@ type GamesScreenProps = {
   hasLoadError: boolean;
   isLoading: boolean;
   onAddGame: () => void;
-  onChangeAccess: (game: Game) => void;
-  onDeleteGame: (game: Game) => void;
   onEditGame: (game: Game) => void;
-  onChooseProgress: (game: Game) => void;
+  onOpenActions: (game: Game) => void;
   onReorder: (updates: PriorityUpdate[]) => void;
   tab: MainTab;
 };
 
 type GameRowProps = {
   game: Game;
-  onChangeAccess: (game: Game) => void;
-  onDelete: (game: Game) => void;
   onEdit: (game: Game) => void;
-  onChooseProgress: (game: Game) => void;
+  onOpenActions: (game: Game) => void;
 };
 
 // Only the wishlist can be reordered, so only its rows subscribe to the drag gesture.
-function DraggableGameRow({
-  game,
-  onChangeAccess,
-  onDelete,
-  onEdit,
-  onChooseProgress,
-}: GameRowProps) {
+function DraggableGameRow({ game, onEdit, onOpenActions }: GameRowProps) {
   const drag = useReorderableDrag();
 
   return (
     <GameCard
       game={game}
-      onChangeAccess={onChangeAccess}
-      onDelete={onDelete}
       onLongPress={drag}
-      onChooseProgress={onChooseProgress}
+      onOpenActions={onOpenActions}
       onPress={onEdit}
     />
   );
@@ -82,10 +70,8 @@ export function GamesScreen({
   hasLoadError,
   isLoading,
   onAddGame,
-  onChangeAccess,
-  onDeleteGame,
   onEditGame,
-  onChooseProgress,
+  onOpenActions,
   onReorder,
   tab,
 }: GamesScreenProps) {
@@ -194,17 +180,13 @@ export function GamesScreen({
             canReorder ? (
               <DraggableGameRow
                 game={item}
-                onChangeAccess={onChangeAccess}
-                onDelete={onDeleteGame}
                 onEdit={onEditGame}
-                onChooseProgress={onChooseProgress}
+                onOpenActions={onOpenActions}
               />
             ) : (
               <GameCard
                 game={item}
-                onChangeAccess={onChangeAccess}
-                onDelete={onDeleteGame}
-                onChooseProgress={onChooseProgress}
+                onOpenActions={onOpenActions}
                 onPress={onEditGame}
               />
             )

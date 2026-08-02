@@ -12,9 +12,7 @@ type GameCardProps = {
   game: Game;
   // Set on the wishlist only, where a long press starts a drag.
   onLongPress?: () => void;
-  onChangeAccess: (game: Game) => void;
-  onDelete: (game: Game) => void;
-  onChooseProgress: (game: Game) => void;
+  onOpenActions: (game: Game) => void;
   onPress: (game: Game) => void;
 };
 
@@ -63,9 +61,7 @@ function createMetaLines(game: Game): string[] {
 export function GameCard({
   game,
   onLongPress,
-  onChangeAccess,
-  onDelete,
-  onChooseProgress,
+  onOpenActions,
   onPress,
 }: GameCardProps) {
   const metaLines = createMetaLines(game);
@@ -108,49 +104,17 @@ export function GameCard({
           </Text>
         ))}
       </View>
-      <View style={styles.actions}>
-        {/* Both buttons stay put for as long as the game is unplayed. The access one
-            never disappears after a purchase: it is how the kind of ownership is set
-            and later changed. */}
-        {game.progress === 'none' ? (
-          <>
-            <Pressable
-              accessibilityLabel={strings.accessibility.changeAccess}
-              hitSlop={6}
-              onPress={() => onChangeAccess(game)}
-              style={({ pressed }) => [
-                styles.actionButton,
-                pressed && styles.pressedButton,
-              ]}
-            >
-              <Ionicons color={colors.primary} name="bag-outline" size={21} />
-            </Pressable>
-            <Pressable
-              accessibilityLabel={strings.accessibility.chooseProgress}
-              hitSlop={6}
-              onPress={() => onChooseProgress(game)}
-              style={({ pressed }) => [
-                styles.actionButton,
-                pressed && styles.pressedButton,
-              ]}
-            >
-              <Ionicons color={colors.primary} name="game-controller-outline" size={21} />
-            </Pressable>
-          </>
-        ) : null}
-        <Pressable
-          accessibilityLabel={strings.accessibility.deleteGame}
-          hitSlop={6}
-          onPress={() => onDelete(game)}
-          style={({ pressed }) => [
-            styles.actionButton,
-            styles.destructiveActionButton,
-            pressed && styles.pressedButton,
-          ]}
-        >
-          <Ionicons color={colors.destructive} name="trash-outline" size={21} />
-        </Pressable>
-      </View>
+      {/* One button rather than a stack of them. Every row action is rare enough to
+          live a tap away, and three accent frames beside every cover made a list of
+          74 games read as a control panel instead of a shelf. */}
+      <Pressable
+        accessibilityLabel={strings.accessibility.rowActions}
+        hitSlop={6}
+        onPress={() => onOpenActions(game)}
+        style={({ pressed }) => [styles.actionButton, pressed && styles.pressedButton]}
+      >
+        <Ionicons color={colors.primary} name="ellipsis-horizontal" size={21} />
+      </Pressable>
     </Pressable>
   );
 }
@@ -205,11 +169,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  actions: {
-    alignItems: 'center',
-    flexDirection: 'column',
-    gap: 6,
-  },
   // The accent frame the add button and the active tab already use, so the buttons
   // read as controls rather than as dim outlines next to the destructive one.
   // 40x40 is the roomier of the two sizes UI_RULES gives, which suits a 148 tall row.
@@ -222,9 +181,6 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     width: 40,
-  },
-  destructiveActionButton: {
-    borderColor: colors.destructiveBorder,
   },
   pressedButton: {
     opacity: 0.7,

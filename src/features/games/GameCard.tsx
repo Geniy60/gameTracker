@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { hasMultiplePlatforms } from '../../gamePlatforms';
@@ -20,6 +20,8 @@ type GameCardProps = {
 // reordered. Short enough to react quickly, long enough not to fire on a tap.
 const dragHoldDelayMs = 220;
 
+type GameTag = { icon: ComponentProps<typeof Ionicons>['name']; label: string };
+
 // One line per property, under the name. Anything the game does not have is left
 // out, as is metadata that every row in the current tab would repeat. The note goes
 // last because it is the only free text and can run onto a second line.
@@ -28,23 +30,6 @@ function createMetaLines(game: Game): string[] {
 
   if (hasMultiplePlatforms()) {
     lines.push(strings.platforms[game.platform]);
-  }
-
-  if (game.access !== null) {
-    lines.push(strings.access[game.access]);
-  } else if (game.progress === 'none') {
-    lines.push(strings.list.toBuyMark);
-  } else {
-    // A game that has been played needs no buying, so the wishlist's call to action
-    // would be wrong here. The line is still needed: without it the card says
-    // nothing about access and leaves the reader to infer it from a gap.
-    lines.push(strings.list.noAccessMark);
-  }
-
-  // Only on the played tab, where it is the one thing that separates two games.
-  // On the wishlist every row would repeat the same "not yet".
-  if (game.progress !== 'none') {
-    lines.push(strings.progress[game.progress]);
   }
 
   if (game.rating !== null) {
@@ -58,6 +43,45 @@ function createMetaLines(game: Game): string[] {
   return lines;
 }
 
+// Access and progress are short closed sets, so they read faster as marks along the
+// bottom than as two more lines of text competing with the note. The label is kept
+// for the screen reader, which cannot see the icon.
+function createTags(game: Game): GameTag[] {
+  const tags: GameTag[] = [createAccessTag(game)];
+
+  // Skipped on the wishlist, where every row would carry the same mark.
+  if (game.progress === 'played') {
+    tags.push({ icon: 'game-controller-outline', label: strings.progress.played });
+  }
+
+  if (game.progress === 'finished') {
+    tags.push({ icon: 'trophy-outline', label: strings.progress.finished });
+  }
+
+  return tags;
+}
+
+function createAccessTag(game: Game): GameTag {
+  if (game.access === 'purchased') {
+    return { icon: 'bag-check-outline', label: strings.access.purchased };
+  }
+
+  if (game.access === 'subscription') {
+    return { icon: 'repeat-outline', label: strings.access.subscription };
+  }
+
+  if (game.access === 'friend') {
+    return { icon: 'people-outline', label: strings.access.friend };
+  }
+
+  // The same fact reads differently by tab: something still to buy on the wishlist,
+  // a game no longer reachable on the played one.
+  return {
+    icon: 'lock-closed-outline',
+    label: game.progress === 'none' ? strings.list.toBuyMark : strings.list.noAccessMark,
+  };
+}
+
 export function GameCard({
   game,
   onLongPress,
@@ -65,6 +89,7 @@ export function GameCard({
   onPress,
 }: GameCardProps) {
   const metaLines = createMetaLines(game);
+  const tags = createTags(game);
   // The covers sit on someone else's CDN and are community uploaded, so an address
   // can stop working. The failed address is remembered rather than a flag: a new
   // cover for the same game then draws normally, without anything having to reset.
@@ -103,6 +128,20 @@ export function GameCard({
             {line}
           </Text>
         ))}
+        {/* Pushed to the bottom of the column so the marks sit on one line along the
+            foot of the card, whatever the text above them takes up. */}
+        <View style={styles.tags}>
+          {tags.map((tag) => (
+            <View
+              accessibilityLabel={tag.label}
+              accessibilityRole="text"
+              key={tag.icon}
+              style={styles.tag}
+            >
+              <Ionicons color={colors.muted} name={tag.icon} size={16} />
+            </View>
+          ))}
+        </View>
       </View>
       {/* One button rather than a stack of them. Every row action is rare enough to
           live a tap away, and three accent frames beside every cover made a list of
@@ -156,7 +195,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
   },
+  // Stretched to the full row height, which the row's flex-start alignment would
+  // otherwise not do, so the tags have a bottom to sit against.
   info: {
+    alignSelf: 'stretch',
     flex: 1,
   },
   name: {
@@ -168,6 +210,22 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     marginTop: 2,
+  },
+  tags: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 'auto',
+    paddingTop: 8,
+  },
+  tag: {
+    alignItems: 'center',
+    backgroundColor: colors.panel,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 28,
+    justifyContent: 'center',
+    width: 28,
   },
   // The accent frame the add button and the active tab already use, so the buttons
   // read as controls rather than as dim outlines next to the destructive one.

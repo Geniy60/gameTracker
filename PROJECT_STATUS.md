@@ -58,11 +58,15 @@ games. Tapping a row opens the edit screen; the trash button deletes after a con
 dialog.
 
 Every row starts with an 88x132 cover picture on the left, followed by a column holding the
-name and one line per property the game actually has: access, progress, rating, and the note.
-Progress is shown on the played tab only, where it is what separates two games; on the
-wishlist every row would repeat the same "not yet". Access is
-the exception and is always shown: a game without any says `Купить` on the wishlist, where
-that is the next move, and `Нет доступа` on the played tab, where it is only a fact. The note
+name and one line per property the game actually has: rating and the note.
+
+Access and progress are not lines but marks along the foot of that column: small framed
+icons, no text. They are short closed sets, so an icon is read at a glance where a fourth and
+fifth line of grey text had to be read word by word. Access always has a mark, including a
+padlock for a game with none, which means `Купить` on the wishlist and `Нет доступа` on the
+played tab. Progress is marked only once it leaves `none`, a controller for started and a
+trophy for finished; on the wishlist every row would otherwise carry the same mark. Each icon
+carries its Russian label for the screen reader, which cannot see it. The note
 comes last, being the only free text. The cover is deliberately large: the wishlist is meant
 to read as a shelf of games rather than a dense table, which is worth the taller rows. Row
 content is top aligned and the action buttons stack in a column on the right, because a short
@@ -216,6 +220,25 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Turned access and progress into icon tags along the bottom of the card.
+
+Details:
+
+- They were two of the four grey lines under the name, and both are short closed sets
+  whose value is recognised rather than read. The lines left in the column are the ones
+  that are genuinely text: rating and the note.
+- The tags sit on one row at the foot of the text column, pushed down with
+  `marginTop: 'auto'`. The column had to be stretched to the row height for that: the
+  row aligns its children to the top, so the column was only as tall as its text.
+- Icons only, no captions, which is the whole point of the change. Each carries its
+  Russian label as an accessibility label, so nothing is lost to a screen reader.
+- A game with no access still gets a mark, a padlock, rather than nothing. Progress
+  keeps the old rule and appears only on the played tab.
+- The icon names were checked against the Ionicons glyph map before being used; a
+  wrong name renders as an empty box rather than failing.
+
+Previous step:
 
 Moved every row action into one menu behind an ellipsis.
 

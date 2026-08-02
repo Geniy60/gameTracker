@@ -140,7 +140,10 @@ export function GameCard({
               key={tag.icon}
               style={styles.tag}
             >
-              <Ionicons color={colors.muted} name={tag.icon} size={20} />
+              {/* The accent colour, not the muted one the meta lines use: a grey icon
+                  on the dark tag was another shade of the same grey. The frame stays
+                  plain, so a tag is still not mistaken for the button beside it. */}
+              <Ionicons color={colors.primary} name={tag.icon} size={20} />
             </View>
           ))}
         </View>

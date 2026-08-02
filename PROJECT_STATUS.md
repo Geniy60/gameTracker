@@ -237,8 +237,10 @@ Details:
 - A game with no access still gets a mark rather than nothing: a dollar sign on the
   wishlist, a padlock on the played tab. Progress keeps the old rule and appears only
   on the played tab.
-- The tags were then enlarged from 28 to 34 with a 20 point icon, which is what makes
-  them readable at arm's length.
+- The tags were then enlarged from 28 to 34 with a 20 point icon, and the icon took the
+  accent colour: muted grey on the dark tag was one shade of grey on another. The frame
+  itself stays plain rather than taking the accent fill the buttons use, so a tag is not
+  mistaken for something tappable.
 - The icon names were checked against the Ionicons glyph map before being used; a
   wrong name renders as an empty box rather than failing.
 

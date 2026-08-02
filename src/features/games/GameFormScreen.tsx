@@ -314,13 +314,19 @@ export function GameFormScreen({
           />
         </View>
 
+      </ScrollView>
+
+      {/* Outside the scroller: the form is already about as tall as the screen, and
+          opening the cover picker makes it taller still. Saving is the one thing that
+          must never be somewhere below the fold. */}
+      <View style={styles.footer}>
         <Pressable
           onPress={handleSave}
           style={({ pressed }) => [styles.saveButton, pressed && styles.pressedButton]}
         >
           <Text style={styles.saveButtonText}>{strings.actions.save}</Text>
         </Pressable>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -344,7 +350,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 28,
+    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  footer: {
+    paddingBottom: 8,
     paddingHorizontal: 20,
     paddingTop: 8,
   },
@@ -433,7 +444,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     minHeight: 48,
-    marginTop: 4,
   },
   saveButtonText: {
     color: colors.primary,

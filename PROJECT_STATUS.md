@@ -211,6 +211,20 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Pinned the save button to the bottom of the form.
+
+Details:
+
+- Everything on the add/edit screen fitted except the save button, which needed a
+  scroll to reach. The button moved out of the `ScrollView` and into a footer, so the
+  fields scroll under it and it is always there.
+- This was chosen over dropping the field labels, which was the other way to win the
+  same 40 pixels. Labels are a one-time cost of vertical space; a save button below the
+  fold is paid every single time. The form also grows well past the screen whenever the
+  cover picker is opened, which no amount of trimming would fix.
+
+Previous step:
+
 Filled the wishlist from store screenshots.
 
 Details:

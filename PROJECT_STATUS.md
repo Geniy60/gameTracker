@@ -193,10 +193,25 @@ Supabase credentials live in `.env.local`, which is ignored by git. `.env.exampl
 the required variables. Unlike GymBro, this project does not commit a `.env` file with real
 keys.
 
-The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-cli init`
-first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
+The project is linked to EAS as `@geniy60/gametracker`, so `npm run build:apk` runs the `apk`
+profile straight away. `app.json` carries the icon, the adaptive icon set and the splash, and
+holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Linked the project to EAS and submitted the first cloud APK build.
+
+Details:
+
+- `npx eas-cli init` created project `c6e3ce44-271d-4c5e-a408-a889eef716b2` under the
+  `geniy60` account, and the Android `versionCode` was bumped to 2.
+- `expo-font` was installed as a direct dependency. Expo Go carries it implicitly, so a
+  standalone build needed it declared.
+- Build `3b21a94b-4789-4931-8842-8a61ae55fd04` was started with `--no-wait` from commit
+  `f98f871`. It was still in progress at the time of writing, so the APK has never been
+  installed on the phone yet.
+
+Previous step:
 
 Drew the app icon and the splash artwork.
 
@@ -420,13 +435,20 @@ Details:
 
 ## Next Proposed Step
 
-Build an installable APK. The app has only ever run through Expo Go, which means the
-development tunnel has to be running on the computer for it to be usable at all. This needs
-`npx eas-cli init` first, since the project is not linked to EAS. The icon and splash are in
-place now, so the build would carry them.
+Install the finished APK on the phone and check that the app starts without the development
+tunnel, that the icon and splash are the drawn ones, and that Supabase and SteamGridDB answer
+with the keys taken from the EAS `production` environment rather than from `.env.local`.
 
-Open afterwards: whether the long press needs a visible drag handle, since nothing on a row
-hints that it can be dragged.
+Proposed after that: the PlayStation Network import script described at the bottom of this
+file. The played tab is a reference list that is currently typed in by hand, which is exactly
+the work a script should do.
+
+Open afterwards:
+
+- Whether the long press needs a visible drag handle, since nothing on a row hints that it
+  can be dragged.
+- Whether picking a cover by hand is needed. Renaming a game is the only cure for wrong
+  artwork today, which does nothing when the title is already correct.
 
 ## Important Decisions And Open Questions
 
@@ -438,7 +460,6 @@ hints that it can be dragged.
 - No per-user scoping. The app is single user, unlike GymBro which has a user selector.
 - Open question: the GitHub repository visibility is unknown. Real Supabase keys are kept
   out of git as a precaution.
-- Open question: app icon and splash assets are not created yet.
 - Suggested but not implemented: autocomplete of game titles and cover art from an external
   game database such as RAWG or IGDB. This would add an API key and network dependency.
 - Deferred on purpose: importing played games from the PlayStation Network. Sony has no

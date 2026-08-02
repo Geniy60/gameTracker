@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { type ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { createQuickStep, type QuickStepKind } from '../../gameActions';
+import { createGameActions, type GameActionKind } from '../../gameActions';
 import { hasMultiplePlatforms } from '../../gamePlatforms';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
@@ -13,17 +13,21 @@ type GameCardProps = {
   game: Game;
   // Set on the wishlist only, where a long press starts a drag.
   onLongPress?: () => void;
+  onAction: (game: Game) => void;
   onDelete: (game: Game) => void;
   onPress: (game: Game) => void;
-  onQuickStep: (game: Game) => void;
 };
 
 // The default 500 ms feels sluggish when the long press is how the wishlist is
 // reordered. Short enough to react quickly, long enough not to fire on a tap.
 const dragHoldDelayMs = 220;
 
-const quickStepIcons: Record<
-  QuickStepKind,
+// The action column is as tall as the cover so it can hang its buttons from the
+// bottom, which is what keeps them still when one of them disappears.
+const coverHeight = 132;
+
+const actionIcons: Record<
+  GameActionKind,
   ComponentProps<typeof Ionicons>['name']
 > = {
   markOwned: 'bag-check-outline',
@@ -62,12 +66,12 @@ function createMetaLines(game: Game): string[] {
 export function GameCard({
   game,
   onLongPress,
+  onAction,
   onDelete,
   onPress,
-  onQuickStep,
 }: GameCardProps) {
   const metaLines = createMetaLines(game);
-  const quickStep = createQuickStep(game);
+  const actions = createGameActions(game);
 
   return (
     <Pressable
@@ -98,23 +102,20 @@ export function GameCard({
         ))}
       </View>
       <View style={styles.actions}>
-        {quickStep === null ? null : (
+        {actions.map((action) => (
           <Pressable
-            accessibilityLabel={strings.accessibility[quickStep.kind]}
+            accessibilityLabel={strings.accessibility[action.kind]}
             hitSlop={6}
-            onPress={() => onQuickStep(quickStep.game)}
+            key={action.kind}
+            onPress={() => onAction(action.game)}
             style={({ pressed }) => [
               styles.actionButton,
               pressed && styles.pressedButton,
             ]}
           >
-            <Ionicons
-              color={colors.primary}
-              name={quickStepIcons[quickStep.kind]}
-              size={19}
-            />
+            <Ionicons color={colors.primary} name={actionIcons[action.kind]} size={19} />
           </Pressable>
-        )}
+        ))}
         <Pressable
           accessibilityLabel={strings.accessibility.deleteGame}
           hitSlop={6}
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   cover: {
     backgroundColor: colors.panel,
     borderRadius: 6,
-    height: 132,
+    height: coverHeight,
     width: 88,
   },
   coverPlaceholder: {
@@ -182,10 +183,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  // Anchored to the bottom: buying a game removes its "bought it" button, and the
+  // buttons below it must not slide up under the finger that just tapped.
   actions: {
     alignItems: 'center',
     flexDirection: 'column',
     gap: 6,
+    height: coverHeight,
+    justifyContent: 'flex-end',
   },
   // Darker than the row it sits on, so the buttons read as recessed rather than
   // disappearing into the list panel.

@@ -1,22 +1,29 @@
 import type { Game } from './types';
 
-export type QuickStepKind = 'markOwned' | 'markPlayed';
+export type GameActionKind = 'markOwned' | 'markPlayed';
 
-export type QuickStep = {
+export type GameAction = {
+  // The game with the change already applied, ready to be saved.
   game: Game;
-  kind: QuickStepKind;
+  kind: GameActionKind;
 };
 
-// The one obvious next move for a game, offered as a single tap on its row.
-// A game that is both owned and played has no next move, so it gets no button.
-export function createQuickStep(game: Game): QuickStep | null {
+// The actions a game still has ahead of it, in a fixed order. There used to be a
+// single button that changed its meaning after every tap, which made two taps in the
+// same spot do two different things. Each action now means one thing only, and a
+// game simply leaves out the ones that no longer apply.
+export function createGameActions(game: Game): GameAction[] {
   if (game.isPlayed) {
-    return null;
+    return [];
   }
+
+  const actions: GameAction[] = [];
 
   if (game.access === null) {
-    return { game: { ...game, access: 'purchased' }, kind: 'markOwned' };
+    actions.push({ game: { ...game, access: 'purchased' }, kind: 'markOwned' });
   }
 
-  return { game: { ...game, isPlayed: true }, kind: 'markPlayed' };
+  actions.push({ game: { ...game, isPlayed: true }, kind: 'markPlayed' });
+
+  return actions;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createQuickStep } from './gameActions';
+import { createGameActions } from './gameActions';
 import type { Game } from './types';
 
 function createGame(overrides: Partial<Game>): Game {
@@ -19,28 +19,35 @@ function createGame(overrides: Partial<Game>): Game {
   };
 }
 
-describe('createQuickStep', () => {
-  it('offers buying a wanted game', () => {
-    const step = createQuickStep(createGame({}));
+describe('createGameActions', () => {
+  it('offers buying and playing a game that is neither owned nor played', () => {
+    const actions = createGameActions(createGame({}));
 
-    expect(step?.kind).toBe('markOwned');
-    expect(step?.game.access).toBe('purchased');
-    expect(step?.game.isPlayed).toBe(false);
+    expect(actions.map((action) => action.kind)).toEqual(['markOwned', 'markPlayed']);
   });
 
-  it('offers marking an owned game as played', () => {
-    const step = createQuickStep(createGame({ access: 'subscription' }));
+  it('drops only the buying action once the game is owned', () => {
+    const actions = createGameActions(createGame({ access: 'subscription' }));
 
-    expect(step?.kind).toBe('markPlayed');
-    expect(step?.game.isPlayed).toBe(true);
+    expect(actions.map((action) => action.kind)).toEqual(['markPlayed']);
+  });
+
+  it('applies the change to the game it hands back', () => {
+    const [buy, play] = createGameActions(createGame({}));
+
+    expect(buy?.game.access).toBe('purchased');
+    expect(buy?.game.isPlayed).toBe(false);
+    expect(play?.game.isPlayed).toBe(true);
   });
 
   it('keeps the existing access when marking as played', () => {
-    expect(createQuickStep(createGame({ access: 'friend' }))?.game.access).toBe('friend');
+    const [play] = createGameActions(createGame({ access: 'friend' }));
+
+    expect(play?.game.access).toBe('friend');
   });
 
   it('offers nothing once a game is played', () => {
-    expect(createQuickStep(createGame({ access: 'purchased', isPlayed: true }))).toBeNull();
-    expect(createQuickStep(createGame({ isPlayed: true }))).toBeNull();
+    expect(createGameActions(createGame({ access: 'purchased', isPlayed: true }))).toEqual([]);
+    expect(createGameActions(createGame({ isPlayed: true }))).toEqual([]);
   });
 });

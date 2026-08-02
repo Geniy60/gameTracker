@@ -94,11 +94,15 @@ Rows use `subtleBackground`; `panel` and `surface` both sit too close to the app
 to read as separate elements. Row action buttons use the darker `panel` so they stay visible
 against the row.
 
-Each row can also carry one quick-step button, the single obvious next move for that game:
-a game with no access offers "bought it", an owned unplayed game offers "played it", and a
-game that is already played offers nothing. The logic lives in `src/gameActions.ts` and is
-unit tested. "Bought it" now keeps the game in the wishlist and only moves it between the
+A row carries a button per action the game still has ahead of it: "bought it" while it has no
+access, and "played it" while it is unplayed. The logic lives in `src/gameActions.ts` and is
+unit tested. "Bought it" keeps the game in the wishlist and only moves it between the
 ownership filters; "played it" is what moves it to the other tab.
+
+This used to be one button that changed its meaning after each tap, so two taps in the same
+spot did two different things and the second one made the game disappear. Splitting them was
+the fix. The buttons hang from the bottom of the row, so losing the "bought it" button does
+not slide the others up under the finger that just tapped.
 
 Sorting depends on the tab. The wishlist follows the user's own order through the `priority`
 column, lowest first, with `createdAt` breaking ties. The played tab is a reference list
@@ -167,6 +171,19 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Split the single quick-step button into one button per action.
+
+Details:
+
+- `createQuickStep` became `createGameActions` and returns every action a game still has,
+  in a fixed order, instead of guessing one next move.
+- A game with no access now shows a "Купить" line, so the card states what it is rather
+  than leaving the reader to infer it from a missing line.
+- The action column hangs from the bottom of the row so buttons never move when one of
+  them goes away.
+
+Previous step:
 
 Filled the covers from SteamGridDB.
 

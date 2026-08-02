@@ -228,7 +228,7 @@ function MainStack() {
                     onEditGame={(game) =>
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
-                    onQuickStep={(game) => void handleSaveGame(game)}
+                    onAction={(game) => void handleSaveGame(game)}
                     onReorder={(updates) => void handleReorder(updates)}
                     tab={tab}
                   />

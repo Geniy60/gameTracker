@@ -10,11 +10,11 @@ import ReorderableList, {
 import { EmptyState } from '../../components/EmptyState';
 import { OptionChips } from '../../components/OptionChips';
 import { SearchInput } from '../../components/SearchInput';
-import { filterWishlistGames } from '../../gameFilters';
+import { filterPlayedGames, filterWishlistGames } from '../../gameFilters';
 import { reorderPriorities, type PriorityUpdate } from '../../gameOrder';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
-import type { Game, MainTab, WishlistFilter } from '../../types';
+import type { Game, MainTab, PlayedFilter, WishlistFilter } from '../../types';
 import { GameCard } from './GameCard';
 
 // The library scales a dragged row up by default, which pushes its edges past the
@@ -26,6 +26,12 @@ const wishlistFilterOptions: { label: string; value: WishlistFilter }[] = [
   { label: strings.wishlistFilters.all, value: 'all' },
   { label: strings.wishlistFilters.owned, value: 'owned' },
   { label: strings.wishlistFilters.toBuy, value: 'toBuy' },
+];
+
+const playedFilterOptions: { label: string; value: PlayedFilter }[] = [
+  { label: strings.playedFilters.all, value: 'all' },
+  { label: strings.playedFilters.finished, value: 'finished' },
+  { label: strings.playedFilters.unfinished, value: 'unfinished' },
 ];
 
 type GamesScreenProps = {
@@ -85,6 +91,7 @@ export function GamesScreen({
 }: GamesScreenProps) {
   const [searchText, setSearchText] = useState('');
   const [wishlistFilter, setWishlistFilter] = useState<WishlistFilter>('all');
+  const [playedFilter, setPlayedFilter] = useState<PlayedFilter>('all');
   // The list sits inside the horizontal tab pager. The library's default drag gesture
   // has no axis limit and swallows the sideways swipe that changes tabs, so it is
   // replaced with one that only reacts to vertical movement. Memoized because the
@@ -94,12 +101,18 @@ export function GamesScreen({
     [],
   );
   const normalizedSearch = searchText.trim().toLowerCase();
-  // The ownership filter belongs to the wishlist only; the played tab ignores it.
-  const activeFilter: WishlistFilter = tab === 'wishlist' ? wishlistFilter : 'all';
-  const visibleGames = filterWishlistGames(games, activeFilter).filter((game) =>
+  // Each tab has its own quick filter: ownership on the wishlist, progress on the
+  // played tab. Only the one belonging to this tab is applied.
+  const isFiltered =
+    tab === 'wishlist' ? wishlistFilter !== 'all' : playedFilter !== 'all';
+  const filteredGames =
+    tab === 'wishlist'
+      ? filterWishlistGames(games, wishlistFilter)
+      : filterPlayedGames(games, playedFilter);
+  const visibleGames = filteredGames.filter((game) =>
     game.name.toLowerCase().includes(normalizedSearch),
   );
-  const isNarrowed = normalizedSearch.length > 0 || activeFilter !== 'all';
+  const isNarrowed = normalizedSearch.length > 0 || isFiltered;
   // Reordering a narrowed list would move a game past rows the user cannot see, so
   // the result would not be the one the drag appeared to describe.
   const canReorder = tab === 'wishlist' && !isNarrowed;
@@ -107,6 +120,7 @@ export function GamesScreen({
   function resetFilters() {
     setSearchText('');
     setWishlistFilter('all');
+    setPlayedFilter('all');
   }
 
   function handleReorder({ from, to }: ReorderableListReorderEvent) {
@@ -129,15 +143,21 @@ export function GamesScreen({
           <Ionicons color={colors.primary} name="add" size={26} />
         </Pressable>
       </View>
-      {tab === 'wishlist' ? (
-        <View style={styles.filterRow}>
+      <View style={styles.filterRow}>
+        {tab === 'wishlist' ? (
           <OptionChips
             onSelect={setWishlistFilter}
             options={wishlistFilterOptions}
             selectedValue={wishlistFilter}
           />
-        </View>
-      ) : null}
+        ) : (
+          <OptionChips
+            onSelect={setPlayedFilter}
+            options={playedFilterOptions}
+            selectedValue={playedFilter}
+          />
+        )}
+      </View>
       {isLoading ? (
         <View style={styles.centeredState}>
           <ActivityIndicator color={colors.primary} size="large" />

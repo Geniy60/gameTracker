@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   filterGamesByTab,
+  filterPlayedGames,
   filterWishlistGames,
   findTabForGame,
   selectGamesForTab,
@@ -58,6 +59,22 @@ describe('filterWishlistGames', () => {
 
   it('shows only games without access as to buy', () => {
     expect(filterWishlistGames(wishlist, 'toBuy')).toEqual([wanted]);
+  });
+});
+
+describe('filterPlayedGames', () => {
+  const played = [ownedPlayed, lostAccessFinished];
+
+  it('shows everything by default', () => {
+    expect(filterPlayedGames(played, 'all')).toEqual(played);
+  });
+
+  it('shows only finished games', () => {
+    expect(filterPlayedGames(played, 'finished')).toEqual([lostAccessFinished]);
+  });
+
+  it('shows only games that were started and left', () => {
+    expect(filterPlayedGames(played, 'unfinished')).toEqual([ownedPlayed]);
   });
 });
 

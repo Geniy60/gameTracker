@@ -3,6 +3,7 @@ import type {
   GamePlatform,
   GameProgress,
   MainTab,
+  PlayedFilter,
   WishlistFilter,
 } from './types';
 
@@ -16,6 +17,11 @@ export const strings = {
     owned: 'Есть',
     toBuy: 'Купить',
   } satisfies Record<WishlistFilter, string>,
+  playedFilters: {
+    all: 'Все',
+    finished: 'Прошёл',
+    unfinished: 'Не прошёл',
+  } satisfies Record<PlayedFilter, string>,
   search: {
     games: 'Поиск игры',
   },

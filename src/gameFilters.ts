@@ -1,4 +1,4 @@
-import type { Game, MainTab, WishlistFilter } from './types';
+import type { Game, MainTab, PlayedFilter, WishlistFilter } from './types';
 
 export function selectGamesForTab(games: Game[], tab: MainTab): Game[] {
   return sortGamesForTab(filterGamesByTab(games, tab), tab);
@@ -23,6 +23,19 @@ export function filterWishlistGames(games: Game[], filter: WishlistFilter): Game
 
   if (filter === 'toBuy') {
     return games.filter((game) => game.access === null);
+  }
+
+  return games;
+}
+
+// The progress filter inside the played tab.
+export function filterPlayedGames(games: Game[], filter: PlayedFilter): Game[] {
+  if (filter === 'finished') {
+    return games.filter((game) => game.progress === 'finished');
+  }
+
+  if (filter === 'unfinished') {
+    return games.filter((game) => game.progress === 'played');
   }
 
   return games;

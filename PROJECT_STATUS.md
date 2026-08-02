@@ -26,10 +26,11 @@ does not decide whether a game belongs there, so there are only two tabs:
 - Wishlist: every game that is not played yet, owned or not
 - Played: every played game, with or without access
 
-Inside the wishlist an ownership filter narrows the list to `Все` / `Есть` / `Купить`, where
-`Есть` means access is set (bought, at a friend's, or in a subscription) and `Купить` means
-there is none. The filter is screen-local state, not part of the query. Both filters live in
-`src/gameFilters.ts`, which is unit tested.
+Each tab has its own quick filter under the search row. The wishlist filters by ownership,
+`Все` / `Есть` / `Купить`, where `Есть` means access is set (bought, at a friend's, or in a
+subscription) and `Купить` means there is none. The played tab filters by progress, `Все` /
+`Прошёл` / `Не прошёл`. Both are screen-local state rather than part of the query, and all of
+the filtering lives in `src/gameFilters.ts`, which is unit tested.
 
 There used to be a third `Есть` tab. It was removed because ownership is a property of a
 wanted game, not a separate list, and a played game that is still owned had to appear in two
@@ -209,6 +210,21 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Added the progress filter to the played tab.
+
+Details:
+
+- `Все` / `Прошёл` / `Не прошёл`, in the same chip row the wishlist uses for
+  ownership. Each tab now has a quick filter, and only its own is applied.
+- `Не прошёл` is the one worth having: it picks the games that were started and left
+  out of a reference list of 93. Finding those by scrolling was the alternative.
+- `filterPlayedGames` sits beside `filterWishlistGames` in `src/gameFilters.ts` and is
+  unit tested the same way. 19 tests pass.
+- The filter is screen-local state, like the wishlist one, so each tab keeps its own
+  while both pages stay mounted.
+
+Previous step:
 
 Split "played" into played and finished.
 

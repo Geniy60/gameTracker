@@ -6,6 +6,10 @@ export type MainTab = 'wishlist' | 'played';
 // now, 'toBuy' means it is not.
 export type WishlistFilter = 'all' | 'owned' | 'toBuy';
 
+// Progress filter over the played tab. 'unfinished' is a game that was started and
+// left, which is the one thing worth picking out of a long reference list.
+export type PlayedFilter = 'all' | 'finished' | 'unfinished';
+
 // How the user can reach the game right now. null means no access at all.
 export type GameAccess = 'purchased' | 'friend' | 'subscription';
 

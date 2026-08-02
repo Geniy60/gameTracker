@@ -76,9 +76,10 @@ none gets a dollar sign on the wishlist, where it means `Купить`, and a pa
 tab, where it means `Нет доступа` and telling the user to buy something they have finished
 would make no sense. Progress is marked only once it leaves `none`, a controller for started
 and a trophy for finished; on the wishlist every row would otherwise carry the same mark.
-The rating comes first, being what a played card is usually read for, and keeps the plain
-text colour: the two colours mean something owned and something that wants money, and an
-opinion is neither. Each icon carries its Russian label for the screen reader, which cannot
+The rating comes first, being what a played card is usually read for, and is amber, the
+colour a rating is expected in. The dollar sign wears the same amber, but the two never
+appear together: a rated game has been played, and the dollar only marks a wishlist game.
+Each icon carries its Russian label for the screen reader, which cannot
 see it. The note is above them all, being the only free text. The cover is deliberately large: the wishlist is meant
 to read as a shelf of games rather than a dense table, which is worth the taller rows. Row
 content is top aligned and the action buttons stack in a column on the right, because a short
@@ -259,9 +260,10 @@ Details:
   the foot of the card, a star with the number beside it. It was one grey line among
   others while being the one thing a played card is usually read for. The star is
   what keeps a lone number from being read as something else.
-- The mark keeps the plain text colour. The two colours in the palette mean
-  something the user has and something that wants money; an opinion is neither, the
-  same reason `Играл` is plain.
+- The mark is amber, which is the colour a rating is expected in. That was first the
+  plain text colour, on the grounds that amber meant "wants money"; the rule was
+  rewritten instead, since the dollar sign and the rating can never appear on the
+  same card. Amber now means the mark worth a second look.
 - Marks were square by a fixed width; they now hold that as a minimum with side
   padding, so the icon-only ones are unchanged and the rating one is a little wider.
 

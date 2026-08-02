@@ -49,19 +49,20 @@ function createMetaLines(game: Game): string[] {
 // bottom than as two more lines of text competing with the note. The label is kept
 // for the screen reader, which cannot see the icon.
 //
-// The colour carries one rule and only one: green is something the user has or has
-// done, amber is something that wants money, grey is a dead end. The accent colour is
-// deliberately not used, since everything else in the app already is it.
+// Green is something the user has or has done, grey is a dead end, and amber is the
+// mark worth a second look: the rating, and the game still to be bought. The accent
+// colour is deliberately not used, since everything else in the app already is it.
 function createTags(game: Game): GameTag[] {
   const tags: GameTag[] = [];
 
   // First, because it is the one thing on a played card the user is looking for.
-  // The star keeps a lone number from being read as anything else. Plain text
-  // colour: an opinion is neither something owned nor something to pay for, which
-  // is all the two coloured marks mean.
+  // The star keeps a lone number from being read as anything else, and amber is the
+  // colour a rating is expected in. It is the colour the dollar sign also wears, but
+  // the two never meet: a rated game has been played, and the dollar only marks a
+  // wishlist game with no access.
   if (game.rating !== null) {
     tags.push({
-      color: colors.text,
+      color: colors.attention,
       icon: 'star',
       label: strings.list.ratingValue(game.rating),
       text: String(game.rating),

@@ -199,6 +199,25 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Filled the covers of the imported games.
+
+Details:
+
+- `scripts/fillCovers.mjs` takes the rows where `cover_url` is null and runs the same
+  two requests the app makes after a save. One game at a time, a second between them,
+  and a 429 or 403 ends the run instead of being retried. Restricting it to empty
+  covers is what makes stopping free: the next run continues where it left off.
+- 92 of the 93 games got a cover. The one that did not was `Warhammer 40,000: Space
+  Marine 2`, whose first search match is its mod tools, an entry with no box art.
+- The script now tries the first three search matches instead of only the first, and
+  the extra request happens only when the one before found nothing. That covered the
+  last game, so all 93 have artwork.
+- `src/services/steamGridDb.ts` still takes the first match only, so a game added
+  through the form can hit the same thing. It was left alone: the app's lookup runs
+  in the background after a save and stays deliberately minimal.
+
+Previous step:
+
 Added the PlayStation Network import script and filled the played tab with it.
 
 Details:
@@ -474,11 +493,9 @@ Details:
 
 ## Next Proposed Step
 
-A second script to fill the covers of the 92 rows where `cover_url` is null. It is separate
-from the import because it is around twice as many requests to SteamGridDB, and a failure in
-the middle of those must not leave the import half done. It goes one request at a time with a
-pause, and stops on 429 or 403 rather than retrying. Being restricted to empty covers makes
-it resumable, so stopping costs nothing.
+Look at the imported list on the phone. 93 games is the first time the app holds a real
+amount of data, so this is where a slow list, a wrong cover or a name that does not fit the
+row will actually show up.
 
 Open afterwards:
 

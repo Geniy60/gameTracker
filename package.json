@@ -38,6 +38,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "import:psn": "node scripts/importPsnGames.mjs",
+    "import:covers": "node scripts/fillCovers.mjs",
     "db:apply": "node scripts/applyMigration.mjs",
     "db:apply:latest": "node scripts/applyMigration.mjs latest",
     "test": "npm run typecheck && npm run test:unit",

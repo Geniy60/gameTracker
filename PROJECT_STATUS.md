@@ -199,6 +199,31 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Made the cover fixable by hand: a picker of candidates and a plain URL field.
+
+Details:
+
+- The form has a `Обложка` field holding the address, with a button beside it that
+  offers up to eight covers for the current name. Tapping one fills the field and
+  closes the grid, the same way the title suggestions behave.
+- Both were built rather than one: the picker settles the common case, a wrong
+  artwork for the right game, in a single tap. The field covers everything else,
+  including a picture from somewhere other than SteamGridDB. Neither replaces the
+  other.
+- Clearing the field is how a fresh automatic lookup is asked for: an empty cover is
+  what makes the app look one up after the save.
+- A cover the user picked or typed now survives a rename. Until now any rename
+  dropped the cover so a new one would be fetched, which would have thrown away a
+  deliberate choice. A `isCoverManual` flag in the form tells the two apart; nothing
+  is stored in the database for it, since the distinction only matters while the form
+  is open.
+- `findCoverUrl` and the new `findCoverOptions` now share one function that tries the
+  first three search matches instead of only the first, so the app no longer trips on
+  entries like the Space Marine 2 mod tools. The extra request happens only when the
+  one before found nothing.
+
+Previous step:
+
 Filled the covers of the imported games.
 
 Details:
@@ -212,9 +237,9 @@ Details:
 - The script now tries the first three search matches instead of only the first, and
   the extra request happens only when the one before found nothing. That covered the
   last game, so all 93 have artwork.
-- `src/services/steamGridDb.ts` still takes the first match only, so a game added
-  through the form can hit the same thing. It was left alone: the app's lookup runs
-  in the background after a save and stays deliberately minimal.
+- `src/services/steamGridDb.ts` still took the first match only at this point, so a
+  game added through the form could hit the same thing. The step after this one gave
+  the app the same fallback.
 
 Previous step:
 
@@ -493,16 +518,18 @@ Details:
 
 ## Next Proposed Step
 
-Look at the imported list on the phone. 93 games is the first time the app holds a real
-amount of data, so this is where a slow list, a wrong cover or a name that does not fit the
-row will actually show up.
+Check the cover picker on the phone, and the imported list along with it. 93 games is the
+first time the app holds a real amount of data, so this is where a slow list or a name that
+does not fit the row will actually show up.
 
 Open afterwards:
 
 - Whether the long press needs a visible drag handle, since nothing on a row hints that it
   can be dragged.
-- Whether picking a cover by hand is needed. Renaming a game is the only cure for wrong
-  artwork today, which does nothing when the title is already correct.
+- Whether a dead cover address should fall back to the placeholder. The card shows the
+  placeholder only when `cover_url` is null, so a link that stops working leaves a hole in
+  the row instead. The pictures sit on the SteamGridDB CDN and are community uploaded, so
+  this is possible; how likely is unknown.
 
 ## Important Decisions And Open Questions
 

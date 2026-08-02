@@ -7,7 +7,16 @@ const apiKey = process.env.EXPO_PUBLIC_STEAMGRIDDB_API_KEY;
 
 // 600x900 is the portrait box art size. Static only, and the community flags for
 // adult and joke artwork are filtered out.
-const coverQuery = 'dimensions=600x900&types=static&nsfw=false&humor=false&limit=1';
+const coverQuery = 'dimensions=600x900&types=static&nsfw=false&humor=false';
+
+// The first search match is not always a game: searching for Space Marine 2 puts
+// its mod tools first, and those carry no box art. The next matches are tried only
+// when the one before turned up nothing.
+const maxSearchCandidates = 3;
+
+// How many covers the picker offers. Enough to find a decent one, few enough to
+// stay a couple of rows under the field.
+const maxCoverOptions = 8;
 
 // How many title suggestions the form offers. Enough to find the right edition,
 // short enough not to push the rest of the form off screen.
@@ -28,21 +37,40 @@ export async function findGameTitles(term: string): Promise<string[]> {
 }
 
 export async function findCoverUrl(gameName: string): Promise<string | null> {
-  const gameId = await searchGames(gameName).then(
-    (response) => response?.data?.[0]?.id,
-  );
+  const covers = await findCoverUrls(gameName, 1);
 
-  if (gameId === undefined) {
-    return null;
+  return covers[0] ?? null;
+}
+
+// The covers the form offers when the one that was found automatically is wrong.
+export function findCoverOptions(gameName: string): Promise<string[]> {
+  return findCoverUrls(gameName, maxCoverOptions);
+}
+
+async function findCoverUrls(gameName: string, limit: number): Promise<string[]> {
+  const search = await searchGames(gameName);
+  const candidates = (search?.data ?? []).slice(0, maxSearchCandidates);
+
+  for (const candidate of candidates) {
+    if (candidate.id === undefined) {
+      continue;
+    }
+
+    const covers = await requestJson<CoversResponse>(
+      `${apiBaseUrl}/grids/game/${candidate.id}?${coverQuery}&limit=${limit}`,
+    );
+    // The thumbnail rather than the full picture: it is only ever drawn small, in
+    // a list row or in the picker.
+    const urls = (covers?.data ?? [])
+      .map((cover) => cover.thumb)
+      .filter((thumb): thumb is string => thumb !== undefined);
+
+    if (urls.length > 0) {
+      return urls;
+    }
   }
 
-  const covers = await requestJson<CoversResponse>(
-    `${apiBaseUrl}/grids/game/${gameId}?${coverQuery}`,
-  );
-
-  // The thumbnail rather than the full picture: it is only ever drawn as a small
-  // square in a list row.
-  return covers?.data?.[0]?.thumb ?? null;
+  return [];
 }
 
 function searchGames(term: string): Promise<SearchResponse | null> {

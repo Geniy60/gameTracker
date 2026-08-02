@@ -6,6 +6,7 @@ export const queryClient = new QueryClient();
 export const queryKeys = {
   games: ['games'] as const,
   gameTitles: (term: string) => ['gameTitles', term] as const,
+  gameCovers: (term: string) => ['gameCovers', term] as const,
 };
 
 export async function invalidateGameQueries(

@@ -1,4 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import {
   Pressable,
@@ -20,7 +22,7 @@ import {
   hasMultiplePlatforms,
 } from '../../gamePlatforms';
 import { queryKeys } from '../../queryClient';
-import { findGameTitles } from '../../services/steamGridDb';
+import { findCoverOptions, findGameTitles } from '../../services/steamGridDb';
 import { strings } from '../../strings';
 import { colors } from '../../theme/colors';
 import type { Game, GameAccess, GamePlatform, MainTab } from '../../types';
@@ -87,21 +89,50 @@ export function GameFormScreen({
   );
   const [rating, setRating] = useState<number | null>(game?.rating ?? null);
   const [note, setNote] = useState(game?.note ?? '');
+  const [coverUrl, setCoverUrl] = useState(game?.coverUrl ?? '');
+  // A cover the user chose must survive a rename, unlike one the app found on its
+  // own. Only this flag can tell the two apart.
+  const [isCoverManual, setIsCoverManual] = useState(false);
   // Suggestions open while the name is being typed and close once one is taken, so
   // they do not sit under the field for the rest of the form.
   const [areTitlesOpen, setAreTitlesOpen] = useState(false);
+  const [areCoversOpen, setAreCoversOpen] = useState(false);
   const searchedTitle = useDebouncedValue(name.trim(), titleSearchDelayMs);
   const titlesQuery = useQuery({
     enabled: areTitlesOpen && searchedTitle.length >= minTitleSearchLength,
     queryFn: () => findGameTitles(searchedTitle),
     queryKey: queryKeys.gameTitles(searchedTitle),
   });
+  const coversQuery = useQuery({
+    enabled: areCoversOpen && name.trim().length >= minTitleSearchLength,
+    queryFn: () => findCoverOptions(name.trim()),
+    queryKey: queryKeys.gameCovers(name.trim()),
+  });
   // The title already typed in full is not worth offering back.
   const titles = (titlesQuery.data ?? []).filter((title) => title !== name.trim());
+  const coverOptions = coversQuery.data ?? [];
 
   function takeTitle(title: string) {
     setName(title);
     setAreTitlesOpen(false);
+  }
+
+  function takeCover(url: string) {
+    setCoverUrl(url);
+    setIsCoverManual(true);
+    setAreCoversOpen(false);
+  }
+
+  // An untouched cover keeps the old rule: it belongs to the name it was found by,
+  // so a rename drops it and the save that follows looks up a new one. A cover the
+  // user picked or typed is theirs and is left alone. Clearing the field is how a
+  // fresh lookup is asked for.
+  function resolveCoverUrl(trimmedName: string): string | null {
+    if (isCoverManual) {
+      return coverUrl.trim().length === 0 ? null : coverUrl.trim();
+    }
+
+    return game !== null && game.name === trimmedName ? game.coverUrl : null;
   }
 
   function handleSave() {
@@ -114,10 +145,7 @@ export function GameFormScreen({
 
     onSave({
       access,
-      // A cover belongs to the name it was found by. Renaming a game drops it, and
-      // the save that follows looks up a new one, which is how a wrong cover is
-      // fixed.
-      coverUrl: game !== null && game.name === trimmedName ? game.coverUrl : null,
+      coverUrl: resolveCoverUrl(trimmedName),
       // The database owns createdAt; this value only keeps the object complete
       // until the list refetches.
       createdAt: game?.createdAt ?? new Date().toISOString(),
@@ -169,6 +197,55 @@ export function GameFormScreen({
               </Text>
             </Pressable>
           ))}
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>{strings.gameForm.coverLabel}</Text>
+          <View style={styles.coverRow}>
+            <TextInput
+              autoCapitalize="none"
+              autoCorrect={false}
+              onChangeText={(text) => {
+                setCoverUrl(text);
+                setIsCoverManual(true);
+              }}
+              placeholder={strings.gameForm.coverPlaceholder}
+              placeholderTextColor={colors.muted}
+              style={[styles.input, styles.coverInput]}
+              value={coverUrl}
+            />
+            <Pressable
+              accessibilityLabel={strings.accessibility.pickCover}
+              accessibilityRole="button"
+              onPress={() => setAreCoversOpen((isOpen) => !isOpen)}
+              style={({ pressed }) => [
+                styles.coverPickButton,
+                pressed && styles.pressedButton,
+              ]}
+            >
+              <Ionicons color={colors.primary} name="images-outline" size={22} />
+            </Pressable>
+          </View>
+          {areCoversOpen && coverOptions.length > 0 ? (
+            <View style={styles.coverOptions}>
+              {coverOptions.map((url) => (
+                <Pressable
+                  key={url}
+                  onPress={() => takeCover(url)}
+                  style={({ pressed }) => [
+                    styles.coverOption,
+                    url === coverUrl && styles.selectedCoverOption,
+                    pressed && styles.pressedButton,
+                  ]}
+                >
+                  <Image contentFit="cover" source={url} style={styles.coverImage} />
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+          {areCoversOpen && coversQuery.isSuccess && coverOptions.length === 0 ? (
+            <Text style={styles.coverEmpty}>{strings.gameForm.coverNotFound}</Text>
+          ) : null}
         </View>
 
         <View style={styles.field}>
@@ -280,6 +357,47 @@ const styles = StyleSheet.create({
   noteInput: {
     height: 110,
     paddingTop: 12,
+  },
+  coverRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+  },
+  coverInput: {
+    flex: 1,
+  },
+  coverPickButton: {
+    alignItems: 'center',
+    backgroundColor: colors.active,
+    borderColor: colors.activeBorder,
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  coverOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  coverOption: {
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  selectedCoverOption: {
+    borderColor: colors.activeBorder,
+    borderWidth: 2,
+  },
+  coverImage: {
+    height: 108,
+    width: 72,
+  },
+  coverEmpty: {
+    color: colors.muted,
+    fontSize: 14,
   },
   titleSuggestion: {
     backgroundColor: colors.surface,

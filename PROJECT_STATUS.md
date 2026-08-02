@@ -199,7 +199,7 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
-Added the PlayStation Network import script and imported the first ten games with it.
+Added the PlayStation Network import script and filled the played tab with it.
 
 Details:
 
@@ -228,8 +228,10 @@ Details:
 - The dry run found three entries named after the trophy set rather than the game, such
   as `Mortal Kombat 11 Trophies`. A trailing `Trophies` is now stripped, otherwise the
   cover lookup would search for a game that does not exist under that name.
-- Ten games were imported and a second dry run then reported 11 rows in the table and 82
-  titles still new, which is the idempotency working.
+- Ten games were imported first and a second dry run then reported 11 rows in the table
+  and 82 titles still new, which is the idempotency working. The remaining 82 followed.
+- The table now holds 93 games, all of them played, none of them duplicated, and 92 with
+  no cover. The wishlist is empty, which it already was.
 - PSN capitalisation is kept as it comes, including shouting ones like `SILENT HILL 2`.
   Title casing them would break `LIMBO`, `INSIDE` and `F.I.S.T.`, which are stylised that
   way on purpose.
@@ -472,13 +474,11 @@ Details:
 
 ## Next Proposed Step
 
-Import the remaining 82 games, once the first ten have been looked at in the app.
-
-After that, a second script to fill the covers of rows where `cover_url` is null. It has to
-be separate: at a few hundred games that is around twice as many requests to SteamGridDB, and
-a failure in the middle of those must not leave the import half done. It should go one
-request at a time with a pause, and stop on 429 or 403 rather than retry. Being restricted to
-empty covers makes it resumable, so stopping costs nothing.
+A second script to fill the covers of the 92 rows where `cover_url` is null. It is separate
+from the import because it is around twice as many requests to SteamGridDB, and a failure in
+the middle of those must not leave the import half done. It goes one request at a time with a
+pause, and stops on 429 or 403 rather than retrying. Being restricted to empty covers makes
+it resumable, so stopping costs nothing.
 
 Open afterwards:
 

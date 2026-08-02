@@ -44,11 +44,32 @@ games. Tapping a row opens the edit screen; the trash button deletes after a con
 dialog.
 
 Every row starts with a cover picture on the left, followed by a column holding the name and
-one line per property. `cover_url` is nullable and nothing fills it yet, so rows currently
-show a placeholder. The square shape is deliberate while the source of the pictures is
-undecided: it crops both portrait box art and landscape artwork without leaving empty bands.
-Covers are drawn with `expo-image` rather than the React Native `Image`, because it keeps its
-own disk cache and scrolling the list must not refetch anything.
+one line per property. Covers are drawn with `expo-image` rather than the React Native
+`Image`, because it keeps its own disk cache and scrolling the list must not refetch
+anything. A game without a cover shows a placeholder, which keeps row heights even.
+
+Covers come from SteamGridDB. It was chosen over RAWG and IGDB after all three were probed:
+RAWG's API was not answering at all and its monthly uptime is around 83%, while IGDB needs a
+Twitch client secret exchanged for a token, and a secret has no business being in a mobile
+bundle. SteamGridDB needs only a read key in a header. Its coverage of PlayStation
+exclusives was verified by hand, including games that never shipped on Steam.
+
+The lookup is two requests: the game id by name, then one cover filtered to
+`dimensions=600x900&types=static&nsfw=false&humor=false&limit=1`. The adult and joke flags
+matter because the artwork is community uploaded. There is no `official` style; the styles
+are `alternate`, `material`, `no_logo` and `white_logo`, so the first result is simply taken.
+The stored address is the thumbnail rather than the full picture, since it is only ever drawn
+at 44x66.
+
+The lookup runs after a save, not before it, and is never awaited by the caller. Two requests
+to a foreign server would otherwise hold the form open every time a game is saved. It only
+runs for a game whose `cover_url` is still empty, so existing games pick up a cover the first
+time they are saved or a quick step is used on them. Every failure is silent: a game without
+a cover is a normal game.
+
+`EXPO_PUBLIC_STEAMGRIDDB_API_KEY` lives in `.env.local`. Being an `EXPO_PUBLIC_` variable it
+is embedded in the app bundle. That is an accepted trade-off for skipping a local script: the
+key is read only, so the worst case is a stranger spending the quota.
 
 The list styling follows GymBro's tile lists and is two separate things that must not be
 merged. The scroller carries only a fixed top line, which rows slide under while scrolling.
@@ -136,13 +157,26 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
+Filled the covers from SteamGridDB.
+
+Details:
+
+- Added `src/services/coversService.ts`. Every path through it returns null instead of
+  throwing, so a lookup can never break a save.
+- The cover is fetched after the save completes and written with a targeted update, so the
+  form closes immediately and the picture appears a moment later.
+- Verified the whole API by hand against the real key before writing any code: search,
+  cover filters, the flags, and coverage of PlayStation exclusives.
+- Rows now use a 44x66 portrait cover, matching the 2:3 box art the service returns.
+
+Previous step:
+
 Prepared the list for cover pictures.
 
 Details:
 
 - Applied `supabase/migrations/20260802140000_gametracker_cover_url.sql`: a nullable
-  `cover_url` column. Nothing writes to it yet, and the form carries the existing value
-  through a save rather than dropping it.
+  `cover_url` column.
 - Rows now put a cover on the left and stack the name and each property on its own line.
 - Added `expo-image` for its disk cache; the built-in `Image` refetches while scrolling.
 - Dropped the "Играл" mark from rows. It could never appear once the wishlist stopped
@@ -281,13 +315,15 @@ Details:
 
 ## Next Proposed Step
 
-Decide where cover pictures come from. The discussed route is looking a game up in an
-external game database by name, storing the returned picture address in `cover_url`, and
-letting `expo-image` cache the bytes on the phone. The lookup should happen once per game,
-not per render, otherwise the list fires a search request per row while scrolling.
+Manual verification of the covers on the phone. The Expo dev server has to be restarted for
+it, since `.env.local` gained a variable and environment values are read when the bundler
+starts.
 
-Also open: whether the long press needs a visible drag handle, since nothing on a row hints
-that it can be dragged.
+Open afterwards: games that are never saved again keep their placeholder, so a way to fill
+covers for the existing list may be wanted. Also open is whether the first search result is
+the right game often enough, or whether a game needs a way to correct its cover by hand.
+And whether the long press needs a visible drag handle, since nothing on a row hints that it
+can be dragged.
 
 ## Important Decisions And Open Questions
 

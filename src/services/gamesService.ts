@@ -47,6 +47,17 @@ export async function saveGame(game: Game): Promise<void> {
   }
 }
 
+export async function saveGameCover(id: string, coverUrl: string): Promise<void> {
+  const { error } = await supabase
+    .from('gametracker_games')
+    .update({ cover_url: coverUrl })
+    .eq('id', id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 // Plain updates rather than one upsert: an upsert payload without the required
 // columns would be rejected as an insert.
 export async function saveGamePriorities(updates: PriorityUpdate[]): Promise<void> {

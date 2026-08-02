@@ -23,10 +23,12 @@ import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilte
 import { nextPriority, type PriorityUpdate } from './gameOrder';
 import type { RootStackParamList } from './navigationTypes';
 import { invalidateGameQueries, queryKeys } from './queryClient';
+import { findCoverUrl } from './services/coversService';
 import {
   deleteGame,
   loadGames,
   saveGame,
+  saveGameCover,
   saveGamePriorities,
 } from './services/gamesService';
 import { strings } from './strings';
@@ -116,10 +118,32 @@ function MainStack() {
     try {
       await saveGame(game);
       await invalidateGameQueries(queryClient);
+      void fetchMissingCover(game);
       return true;
     } catch {
       showAppAlert(strings.alerts.saveTitle, strings.alerts.saveMessage);
       return false;
+    }
+  }
+
+  // Deliberately not awaited by the caller: the cover is optional, and two requests
+  // to a foreign server would otherwise hold the form open after every save.
+  async function fetchMissingCover(game: Game) {
+    if (game.coverUrl !== null) {
+      return;
+    }
+
+    const coverUrl = await findCoverUrl(game.name);
+
+    if (coverUrl === null) {
+      return;
+    }
+
+    try {
+      await saveGameCover(game.id, coverUrl);
+      await invalidateGameQueries(queryClient);
+    } catch {
+      // A missing cover is not worth an error dialog.
     }
   }
 

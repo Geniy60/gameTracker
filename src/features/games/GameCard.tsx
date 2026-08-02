@@ -134,20 +134,19 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'space-between',
     marginBottom: 8,
-    minHeight: 72,
+    minHeight: 82,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   pressedRow: {
     opacity: 0.6,
   },
-  // Square rather than portrait or landscape: the cover source is not decided yet,
-  // and a square crops both shapes without leaving empty bands.
+  // 2:3, matching the 600x900 box art SteamGridDB returns, so nothing is cropped.
   cover: {
     backgroundColor: colors.panel,
     borderRadius: 6,
-    height: 56,
-    width: 56,
+    height: 66,
+    width: 44,
   },
   coverPlaceholder: {
     alignItems: 'center',

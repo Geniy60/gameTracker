@@ -42,6 +42,10 @@ function createMetaLines(game: Game): string[] {
 
   if (game.access !== null) {
     lines.push(strings.access[game.access]);
+  } else if (!game.isPlayed) {
+    // A played game without access needs no buying, so the mark is for the
+    // wishlist only.
+    lines.push(strings.list.toBuyMark);
   }
 
   if (game.rating !== null) {

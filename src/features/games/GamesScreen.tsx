@@ -45,11 +45,10 @@ type GameRowProps = {
   onDelete: (game: Game) => void;
   onEdit: (game: Game) => void;
   onQuickStep: (game: Game) => void;
-  tab: MainTab;
 };
 
 // Only the wishlist can be reordered, so only its rows subscribe to the drag gesture.
-function DraggableGameRow({ game, onDelete, onEdit, onQuickStep, tab }: GameRowProps) {
+function DraggableGameRow({ game, onDelete, onEdit, onQuickStep }: GameRowProps) {
   const drag = useReorderableDrag();
 
   return (
@@ -59,7 +58,6 @@ function DraggableGameRow({ game, onDelete, onEdit, onQuickStep, tab }: GameRowP
       onLongPress={drag}
       onPress={onEdit}
       onQuickStep={onQuickStep}
-      tab={tab}
     />
   );
 }
@@ -166,7 +164,6 @@ export function GamesScreen({
                 onDelete={onDeleteGame}
                 onEdit={onEditGame}
                 onQuickStep={onQuickStep}
-                tab={tab}
               />
             ) : (
               <GameCard
@@ -174,7 +171,6 @@ export function GamesScreen({
                 onDelete={onDeleteGame}
                 onPress={onEditGame}
                 onQuickStep={onQuickStep}
-                tab={tab}
               />
             )
           }

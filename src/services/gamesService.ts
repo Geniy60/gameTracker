@@ -5,7 +5,9 @@ import type { Game } from '../types';
 export async function loadGames(): Promise<Game[]> {
   const { data, error } = await supabase
     .from('gametracker_games')
-    .select('id, created_at, name, access, is_played, priority, platform, rating, note');
+    .select(
+      'id, created_at, name, access, is_played, priority, cover_url, platform, rating, note',
+    );
 
   if (error) {
     throw error;
@@ -18,6 +20,7 @@ export async function loadGames(): Promise<Game[]> {
     access: row.access,
     isPlayed: row.is_played,
     priority: row.priority,
+    coverUrl: row.cover_url,
     platform: row.platform,
     rating: row.rating,
     note: row.note,
@@ -29,6 +32,7 @@ export async function loadGames(): Promise<Game[]> {
 export async function saveGame(game: Game): Promise<void> {
   const { error } = await supabase.from('gametracker_games').upsert({
     access: game.access,
+    cover_url: game.coverUrl,
     id: game.id,
     is_played: game.isPlayed,
     name: game.name,

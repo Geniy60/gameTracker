@@ -11,6 +11,7 @@ function createGame(id: string, priority: number): Game {
     access: null,
     isPlayed: false,
     priority,
+    coverUrl: null,
     platform: 'playstation',
     rating: null,
     note: '',

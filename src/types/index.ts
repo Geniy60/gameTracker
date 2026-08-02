@@ -23,6 +23,8 @@ export type Game = {
   isPlayed: boolean;
   // Manual wishlist order. Lower means higher in the list.
   priority: number;
+  // Address of the cover picture, or null while the game has none.
+  coverUrl: string | null;
   platform: GamePlatform;
   rating: number | null;
   note: string;

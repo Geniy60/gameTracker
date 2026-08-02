@@ -84,7 +84,6 @@ export const strings = {
   },
   list: {
     loadError: 'Не удалось загрузить список игр.',
-    playedMark: 'Играл',
     ratingValue: (rating: number) => `Оценка: ${rating}/10`,
   },
 };

@@ -16,6 +16,7 @@ function createGame(overrides: Partial<Game>): Game {
     access: null,
     isPlayed: false,
     priority: 1,
+    coverUrl: null,
     platform: 'playstation',
     rating: null,
     note: '',

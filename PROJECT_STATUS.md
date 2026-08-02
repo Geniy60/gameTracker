@@ -43,6 +43,13 @@ All tabs share the same screen component and show a search row, an add button, a
 games. Tapping a row opens the edit screen; the trash button deletes after a confirmation
 dialog.
 
+Every row starts with a cover picture on the left, followed by a column holding the name and
+one line per property. `cover_url` is nullable and nothing fills it yet, so rows currently
+show a placeholder. The square shape is deliberate while the source of the pictures is
+undecided: it crops both portrait box art and landscape artwork without leaving empty bands.
+Covers are drawn with `expo-image` rather than the React Native `Image`, because it keeps its
+own disk cache and scrolling the list must not refetch anything.
+
 The list styling follows GymBro's tile lists and is two separate things that must not be
 merged. The scroller carries only a fixed top line, which rows slide under while scrolling.
 Every row carries its own background, border and rounded corners, so a list holding one game
@@ -128,6 +135,20 @@ The project is not linked to EAS yet, so `npm run build:apk` requires `npx eas-c
 first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
+
+Prepared the list for cover pictures.
+
+Details:
+
+- Applied `supabase/migrations/20260802140000_gametracker_cover_url.sql`: a nullable
+  `cover_url` column. Nothing writes to it yet, and the form carries the existing value
+  through a save rather than dropping it.
+- Rows now put a cover on the left and stack the name and each property on its own line.
+- Added `expo-image` for its disk cache; the built-in `Image` refetches while scrolling.
+- Dropped the "Играл" mark from rows. It could never appear once the wishlist stopped
+  holding played games.
+
+Previous step:
 
 Made the wishlist the centre of the app: two tabs, an ownership filter, and a manual order.
 
@@ -260,9 +281,13 @@ Details:
 
 ## Next Proposed Step
 
-Open. The wishlist rework is verified on the phone, including the drag gesture and the tab
-swipe. Worth deciding whether the long press needs a visible drag handle, since nothing on a
-row hints that it can be dragged.
+Decide where cover pictures come from. The discussed route is looking a game up in an
+external game database by name, storing the returned picture address in `cover_url`, and
+letting `expo-image` cache the bytes on the phone. The lookup should happen once per game,
+not per render, otherwise the list fires a search request per row while scrolling.
+
+Also open: whether the long press needs a visible drag handle, since nothing on a row hints
+that it can be dragged.
 
 ## Important Decisions And Open Questions
 

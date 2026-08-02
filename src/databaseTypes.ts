@@ -14,6 +14,7 @@ export type Database = {
       gametracker_games: {
         Row: {
           access: GameAccess | null;
+          cover_url: string | null;
           created_at: string;
           id: string;
           is_played: boolean;
@@ -26,6 +27,7 @@ export type Database = {
         };
         Insert: {
           access?: GameAccess | null;
+          cover_url?: string | null;
           id: string;
           is_played?: boolean;
           name: string;
@@ -36,6 +38,7 @@ export type Database = {
         };
         Update: {
           access?: GameAccess | null;
+          cover_url?: string | null;
           is_played?: boolean;
           name?: string;
           note?: string;

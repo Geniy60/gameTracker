@@ -17,6 +17,11 @@ import { colors } from '../../theme/colors';
 import type { Game, MainTab, WishlistFilter } from '../../types';
 import { GameCard } from './GameCard';
 
+// The library scales a dragged row up by default, which pushes its edges past the
+// list bounds. Android clips there, so the side borders and rounded corners get cut
+// off. Dropping the transform leaves the opacity dim as the drag feedback.
+const dragCellAnimations = { transform: [] };
+
 const wishlistFilterOptions: { label: string; value: WishlistFilter }[] = [
   { label: strings.wishlistFilters.all, value: 'all' },
   { label: strings.wishlistFilters.owned, value: 'owned' },
@@ -146,6 +151,7 @@ export function GamesScreen({
         )
       ) : (
         <ReorderableList
+          cellAnimations={dragCellAnimations}
           contentContainerStyle={styles.listContent}
           data={visibleGames}
           dragEnabled={tab === 'wishlist'}

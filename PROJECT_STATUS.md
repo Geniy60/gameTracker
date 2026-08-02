@@ -77,6 +77,11 @@ nested inside the horizontal pager. Dragging is also disabled outright on the pl
 The long press delay is shortened from the React Native default of 500 ms, which felt
 sluggish for the main way of reordering the list.
 
+The library's default scale animation on a dragged row is switched off. It pushed the row
+past the list bounds, where Android clips, so the side borders and rounded corners were cut
+off while dragging. Bringing it back would mean moving the screen's horizontal padding into
+the list content container, which would also stretch the top line across the full width.
+
 Dragging happens inside the list the user sees, which the ownership filter and the search box
 can narrow. `reorderPriorities` in `src/gameOrder.ts` therefore reuses the priority values the
 visible games already occupy instead of renumbering everything, which leaves every hidden game

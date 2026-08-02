@@ -14,31 +14,30 @@ A game has two independent properties rather than one status:
 - `access`: `purchased`, `friend`, `subscription`, or `null` for no access at all
 - `isPlayed`: whether the user has played it
 
-The three main tabs are filters over those two fields, not mutually exclusive buckets:
+The wishlist is the point of the app: everything the user still wants to play. Ownership
+does not decide whether a game belongs there, so there are only two tabs:
 
-- Wanted: no access and never played
-- Available: access is set, played or not
-- Played: played, with or without access
+- Wishlist: every game that is not played yet, owned or not
+- Played: every played game, with or without access
 
-This matters because a game stays in the available list after it is finished, and losing
-access to a finished game removes it from available while it stays in played. The filter
-lives in `src/gameFilters.ts` and is the one part of the app with unit tests, since the
-overlap between the tabs is easy to get wrong.
+Inside the wishlist an ownership filter narrows the list to `Все` / `Есть` / `Купить`, where
+`Есть` means access is set (bought, at a friend's, or in a subscription) and `Купить` means
+there is none. The filter is screen-local state, not part of the query. Both filters live in
+`src/gameFilters.ts`, which is unit tested.
 
-A played game whose access is gone does not reappear in the wanted list. That was an
-explicit decision, not an accident of the filter.
+There used to be a third `Есть` tab. It was removed because ownership is a property of a
+wanted game, not a separate list, and a played game that is still owned had to appear in two
+tabs at once.
 
-Tab labels are deliberately short because three tabs share one row.
-
-The three tabs live in a horizontal paging `ScrollView`, so they can be swiped between as
-well as tapped, following the sibling Fridge app. Tapping a tab scrolls the pager without
+The two tabs live in a horizontal paging `ScrollView`, so they can be swiped between as well
+as tapped, following the sibling Fridge app. Tapping a tab scrolls the pager without
 animation; swiping updates the active tab from the scroll offset. The pager is never
 scrolled programmatically during a drag, which would fight the gesture.
 
-Unlike Fridge, all three pages are mounted at once. Fridge mounts pages lazily because each
-of its sections loads its own data; here every tab is a filter over one already loaded
-query, so lazy mounting would add code without saving work. One consequence is that each tab
-now keeps its own search text.
+Unlike Fridge, both pages are mounted at once. Fridge mounts pages lazily because each of its
+sections loads its own data; here every tab is a filter over one already loaded query, so
+lazy mounting would add code without saving work. One consequence is that each tab keeps its
+own search text and filter.
 
 All tabs share the same screen component and show a search row, an add button, and a list of
 games. Tapping a row opens the edit screen; the trash button deletes after a confirmation
@@ -48,29 +47,46 @@ The list styling follows GymBro's tile lists and is two separate things that mus
 merged. The scroller carries only a fixed top line, which rows slide under while scrolling.
 Every row carries its own background, border and rounded corners, so a list holding one game
 looks like one element rather than a mostly empty container. Rows are simply denser than
-GymBro's tiles, not frameless.
+GymBro's tiles, not frameless. Row spacing is a `marginBottom` on the row, not a `gap` on the
+list content, because the drag animation measures whole cells and a container gap sits
+outside them.
 
 Rows use `subtleBackground`; `panel` and `surface` both sit too close to the app background
 to read as separate elements. Row action buttons use the darker `panel` so they stay visible
 against the row.
 
 Each row can also carry one quick-step button, the single obvious next move for that game:
-a wanted game offers "bought it", an owned unplayed game offers "played it", and a game that
-is already played offers nothing. The logic lives in `src/gameActions.ts` and is unit
-tested. Using it makes the game leave the current tab, which is the intended feedback; the
-app does not jump tabs, since quick steps are meant to be used several in a row.
+a game with no access offers "bought it", an owned unplayed game offers "played it", and a
+game that is already played offers nothing. The logic lives in `src/gameActions.ts` and is
+unit tested. "Bought it" now keeps the game in the wishlist and only moves it between the
+ownership filters; "played it" is what moves it to the other tab.
 
-Sorting depends on the tab. The wishlist is a queue, so it is newest first by `createdAt`.
-The other two are reference lists sorted by name. `createdAt` is owned by the database and
-never written by the app; an upsert on edit was verified to preserve it.
+Sorting depends on the tab. The wishlist follows the user's own order through the `priority`
+column, lowest first, with `createdAt` breaking ties. The played tab is a reference list
+sorted by name. `createdAt` is owned by the database and never written by the app; an upsert
+on edit was verified to preserve it.
+
+The wishlist order is edited by dragging a row after a long press, using
+`react-native-reorderable-list` on top of `react-native-reanimated`. A new game is written to
+the end of the queue, so a fresh idea does not push aside what the user already decided to
+play next.
+
+Dragging happens inside the list the user sees, which the ownership filter and the search box
+can narrow. `reorderPriorities` in `src/gameOrder.ts` therefore reuses the priority values the
+visible games already occupy instead of renumbering everything, which leaves every hidden game
+exactly where it was. It is unit tested. The new order is written into the query cache before
+the request, otherwise the list snaps back to the old order the moment the finger is lifted.
+
+Priorities are saved with plain per-row updates rather than one upsert: an upsert payload
+carrying only `id` and `priority` would be rejected as an insert against the not-null columns.
 
 The add/edit screen is one form with name, access, played, platform, rating, and note
 fields. Access and played are always editable, since they are what move a game between
 tabs. Rating appears only for played games and is cleared on save otherwise; the database
 enforces the same rule with a check constraint.
 
-A new game inherits its defaults from the tab the add button was pressed on, so adding from
-the available tab starts as purchased and unplayed.
+A new game inherits its defaults from the tab the add button was pressed on: the wishlist
+starts with no access and unplayed, the played tab starts as purchased and played.
 
 Saving can move a game out of the tab it was edited in. When that happens the app switches
 to the tab where the game now belongs instead of returning to a list that no longer contains
@@ -102,6 +118,27 @@ first. `app.json` has no icon or splash assets yet, so Expo defaults are used.
 
 ## Last Completed Step
 
+Made the wishlist the centre of the app: two tabs, an ownership filter, and a manual order.
+
+Details:
+
+- Dropped the `Есть` tab. The wishlist now holds every unplayed game, and `Все` / `Есть` /
+  `Купить` chips filter it by ownership.
+- Applied `supabase/migrations/20260802120000_gametracker_priority.sql`: added the `priority`
+  column and backfilled it from `created_at` descending, so the previous "newest on top"
+  order became the starting queue.
+- Added drag-and-drop reordering. This pulled in `react-native-reanimated`,
+  `react-native-worklets`, `react-native-reorderable-list`, a `babel.config.js`, and a
+  `GestureHandlerRootView` in `App.tsx`. `react-native-draggable-flatlist` was rejected: it
+  has not had real work since 2023 and targets Reanimated 2, while Expo SDK 54 ships
+  Reanimated 4.
+- `babel-preset-expo` had to be added explicitly as a dev dependency; without it Metro could
+  not resolve the preset the new `babel.config.js` names.
+- Verified with `npx expo export --platform android` that the app still bundles.
+- 20 unit tests pass.
+
+Previous step:
+
 Added quick-step buttons, per-tab sorting, and a denser list.
 
 Details:
@@ -111,7 +148,6 @@ Details:
   the button is correct wherever the game is shown.
 - Added `createdAt` to the model for wishlist sorting. Verified against the database that
   the upsert used on save leaves `created_at` untouched.
-- 13 unit tests pass.
 
 Previous step:
 
@@ -213,13 +249,16 @@ Details:
 
 ## Next Proposed Step
 
-Manual verification on the phone through Expo Go: add a few games, switch tabs, edit and
-delete a game, and confirm the data survives an app restart.
+Manual verification on the phone through Expo Go, with the drag gesture as the main risk: the
+reorderable list is nested inside the horizontal tab pager, and the two gestures could fight.
+Also worth checking whether a long press is discoverable enough without a drag handle.
 
 ## Important Decisions And Open Questions
 
-- No status field. Tabs are derived from `access` and `isPlayed`. A "playing now" flag was
-  discussed and deliberately deferred.
+- No status field. Tabs are derived from `isPlayed` alone; `access` only drives the wishlist
+  filter. A "playing now" flag was discussed and deliberately deferred.
+- Drag-and-drop was chosen over move-up arrows after the trade-off was laid out, in exchange
+  for the Reanimated dependency chain.
 - Dark theme only. A light theme was deliberately deferred.
 - No per-user scoping. The app is single user, unlike GymBro which has a user selector.
 - Open question: the GitHub repository visibility is unknown. Real Supabase keys are kept

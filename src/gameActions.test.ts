@@ -10,6 +10,7 @@ function createGame(overrides: Partial<Game>): Game {
     name: 'Game',
     access: null,
     isPlayed: false,
+    priority: 1,
     platform: 'playstation',
     rating: null,
     note: '',

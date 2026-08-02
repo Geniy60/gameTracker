@@ -24,6 +24,8 @@ import type { Game, GameAccess, GamePlatform, MainTab } from '../../types';
 
 type GameFormScreenProps = {
   game: Game | null;
+  // Where a new game lands in the wishlist queue.
+  newGamePriority: number;
   onBack: () => void;
   onSave: (game: Game) => void;
   sourceTab: MainTab;
@@ -55,14 +57,20 @@ const ratingOptions: { label: string; value: number | null }[] = [
 
 // A new game starts out looking like the tab it was added from.
 function createDefaults(sourceTab: MainTab): { access: GameAccess | null; isPlayed: boolean } {
-  if (sourceTab === 'wishlist') {
-    return { access: null, isPlayed: false };
+  if (sourceTab === 'played') {
+    return { access: 'purchased', isPlayed: true };
   }
 
-  return { access: 'purchased', isPlayed: sourceTab === 'played' };
+  return { access: null, isPlayed: false };
 }
 
-export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScreenProps) {
+export function GameFormScreen({
+  game,
+  newGamePriority,
+  onBack,
+  onSave,
+  sourceTab,
+}: GameFormScreenProps) {
   const defaults = createDefaults(sourceTab);
   const [name, setName] = useState(game?.name ?? '');
   const [access, setAccess] = useState<GameAccess | null>(game?.access ?? defaults.access);
@@ -91,6 +99,7 @@ export function GameFormScreen({ game, onBack, onSave, sourceTab }: GameFormScre
       name: trimmedName,
       note: note.trim(),
       platform,
+      priority: game?.priority ?? newGamePriority,
       rating: isPlayed ? rating : null,
     });
   }

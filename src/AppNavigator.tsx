@@ -20,9 +20,15 @@ import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
 import { GamesScreen } from './features/games/GamesScreen';
 import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilters';
+import { nextPriority, type PriorityUpdate } from './gameOrder';
 import type { RootStackParamList } from './navigationTypes';
 import { invalidateGameQueries, queryKeys } from './queryClient';
-import { deleteGame, loadGames, saveGame } from './services/gamesService';
+import {
+  deleteGame,
+  loadGames,
+  saveGame,
+  saveGamePriorities,
+} from './services/gamesService';
 import { strings } from './strings';
 import { colors } from './theme/colors';
 import type { Game, MainTab } from './types';
@@ -30,7 +36,7 @@ import type { Game, MainTab } from './types';
 const Stack = createStackNavigator<RootStackParamList>();
 const MIN_REFRESH_FEEDBACK_MS = 600;
 // Left to right order of the swipe pager. Must match the tab row.
-const tabOrder: MainTab[] = ['wishlist', 'available', 'played'];
+const tabOrder: MainTab[] = ['wishlist', 'played'];
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -117,6 +123,30 @@ function MainStack() {
     }
   }
 
+  // The new order is written into the cache first: waiting for the round trip would
+  // let the list snap back to the old order right after the finger is lifted.
+  async function handleReorder(updates: PriorityUpdate[]) {
+    if (updates.length === 0) {
+      return;
+    }
+
+    queryClient.setQueryData<Game[]>(queryKeys.games, (current) =>
+      current?.map((game) => {
+        const update = updates.find((candidate) => candidate.id === game.id);
+
+        return update === undefined ? game : { ...game, priority: update.priority };
+      }),
+    );
+
+    try {
+      await saveGamePriorities(updates);
+    } catch {
+      showAppAlert(strings.alerts.saveTitle, strings.alerts.saveMessage);
+    } finally {
+      await invalidateGameQueries(queryClient);
+    }
+  }
+
   function confirmDeleteGame(game: Game) {
     showAppAlert(
       strings.alerts.deleteGameTitle,
@@ -175,6 +205,7 @@ function MainStack() {
                       navigation.navigate('GameForm', { game, sourceTab: tab })
                     }
                     onQuickStep={(game) => void handleSaveGame(game)}
+                    onReorder={(updates) => void handleReorder(updates)}
                     tab={tab}
                   />
                 </View>
@@ -187,6 +218,7 @@ function MainStack() {
         {({ navigation, route }) => (
           <GameFormScreen
             game={route.params.game}
+            newGamePriority={nextPriority(games)}
             onBack={() => navigation.goBack()}
             onSave={(game) => {
               void handleSaveGame(game).then((wasSaved) => {

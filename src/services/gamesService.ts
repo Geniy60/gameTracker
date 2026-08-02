@@ -1,10 +1,11 @@
+import type { PriorityUpdate } from '../gameOrder';
 import { supabase } from '../supabaseClient';
 import type { Game } from '../types';
 
 export async function loadGames(): Promise<Game[]> {
   const { data, error } = await supabase
     .from('gametracker_games')
-    .select('id, created_at, name, access, is_played, platform, rating, note');
+    .select('id, created_at, name, access, is_played, priority, platform, rating, note');
 
   if (error) {
     throw error;
@@ -16,6 +17,7 @@ export async function loadGames(): Promise<Game[]> {
     name: row.name,
     access: row.access,
     isPlayed: row.is_played,
+    priority: row.priority,
     platform: row.platform,
     rating: row.rating,
     note: row.note,
@@ -32,11 +34,31 @@ export async function saveGame(game: Game): Promise<void> {
     name: game.name,
     note: game.note,
     platform: game.platform,
+    priority: game.priority,
     rating: game.isPlayed ? game.rating : null,
   });
 
   if (error) {
     throw error;
+  }
+}
+
+// Plain updates rather than one upsert: an upsert payload without the required
+// columns would be rejected as an insert.
+export async function saveGamePriorities(updates: PriorityUpdate[]): Promise<void> {
+  const results = await Promise.all(
+    updates.map((update) =>
+      supabase
+        .from('gametracker_games')
+        .update({ priority: update.priority })
+        .eq('id', update.id),
+    ),
+  );
+
+  const failed = results.find((result) => result.error !== null);
+
+  if (failed?.error) {
+    throw failed.error;
   }
 }
 

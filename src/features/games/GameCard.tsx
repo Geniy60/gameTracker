@@ -10,6 +10,8 @@ import type { Game, MainTab } from '../../types';
 
 type GameCardProps = {
   game: Game;
+  // Set on the wishlist only, where a long press starts a drag.
+  onLongPress?: () => void;
   onDelete: (game: Game) => void;
   onPress: (game: Game) => void;
   onQuickStep: (game: Game) => void;
@@ -49,6 +51,7 @@ function createMetaParts(game: Game, tab: MainTab): string[] {
 
 export function GameCard({
   game,
+  onLongPress,
   onDelete,
   onPress,
   onQuickStep,
@@ -59,6 +62,7 @@ export function GameCard({
 
   return (
     <Pressable
+      onLongPress={onLongPress}
       onPress={() => onPress(game)}
       style={({ pressed }) => [styles.row, pressed && styles.pressedRow]}
     >
@@ -118,6 +122,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 8,
     minHeight: 52,
     paddingHorizontal: 12,
     paddingVertical: 8,

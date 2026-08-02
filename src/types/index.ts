@@ -1,7 +1,10 @@
-// Access and isPlayed are independent. The tabs are filters over them, not a status:
-// a game stays in the available list after it is played, and a played game whose
-// access is gone stays in the played list.
-export type MainTab = 'wishlist' | 'available' | 'played';
+// The wishlist is the main list: everything the user still wants to play, owned or
+// not. Ownership is a filter inside it, not a separate tab.
+export type MainTab = 'wishlist' | 'played';
+
+// Ownership filter over the wishlist. 'owned' means the game is reachable right
+// now, 'toBuy' means it is not.
+export type WishlistFilter = 'all' | 'owned' | 'toBuy';
 
 // How the user can reach the game right now. null means no access at all.
 export type GameAccess = 'purchased' | 'friend' | 'subscription';
@@ -13,11 +16,13 @@ export type GamePlatform = 'playstation';
 
 export type Game = {
   id: string;
-  // Owned by the database. The app reads it for sorting but never writes it.
+  // Owned by the database. The app reads it only to break priority ties.
   createdAt: string;
   name: string;
   access: GameAccess | null;
   isPlayed: boolean;
+  // Manual wishlist order. Lower means higher in the list.
+  priority: number;
   platform: GamePlatform;
   rating: number | null;
   note: string;

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilters';
+import {
+  filterGamesByTab,
+  filterWishlistGames,
+  findTabForGame,
+  selectGamesForTab,
+} from './gameFilters';
 import type { Game } from './types';
 
 function createGame(overrides: Partial<Game>): Game {
@@ -10,6 +15,7 @@ function createGame(overrides: Partial<Game>): Game {
     name: 'Game',
     access: null,
     isPlayed: false,
+    priority: 1,
     platform: 'playstation',
     rating: null,
     note: '',
@@ -25,12 +31,8 @@ const lostAccessPlayed = createGame({ id: 'lost', access: null, isPlayed: true }
 const allGames = [wanted, ownedUnplayed, ownedPlayed, lostAccessPlayed];
 
 describe('filterGamesByTab', () => {
-  it('shows only games without access that were never played as wanted', () => {
-    expect(filterGamesByTab(allGames, 'wishlist')).toEqual([wanted]);
-  });
-
-  it('keeps a played game in the available list while access remains', () => {
-    expect(filterGamesByTab(allGames, 'available')).toEqual([ownedUnplayed, ownedPlayed]);
+  it('keeps every unplayed game in the wishlist, owned or not', () => {
+    expect(filterGamesByTab(allGames, 'wishlist')).toEqual([wanted, ownedUnplayed]);
   });
 
   it('keeps a played game in the played list after access is lost', () => {
@@ -38,46 +40,70 @@ describe('filterGamesByTab', () => {
   });
 });
 
-describe('selectGamesForTab', () => {
-  const older = createGame({ id: 'older', createdAt: '2026-01-01T00:00:00Z', name: 'A' });
-  const newer = createGame({ id: 'newer', createdAt: '2026-07-01T00:00:00Z', name: 'Z' });
+describe('filterWishlistGames', () => {
+  const wishlist = [wanted, ownedUnplayed];
 
-  it('puts the newest idea on top of the wishlist', () => {
+  it('shows everything by default', () => {
+    expect(filterWishlistGames(wishlist, 'all')).toEqual(wishlist);
+  });
+
+  it('shows only reachable games as owned', () => {
+    expect(filterWishlistGames(wishlist, 'owned')).toEqual([ownedUnplayed]);
+  });
+
+  it('shows only games without access as to buy', () => {
+    expect(filterWishlistGames(wishlist, 'toBuy')).toEqual([wanted]);
+  });
+});
+
+describe('selectGamesForTab', () => {
+  const first = createGame({ id: 'first', name: 'Z', priority: 1 });
+  const second = createGame({ id: 'second', name: 'A', priority: 2 });
+
+  it('follows the manual priority in the wishlist', () => {
+    expect(selectGamesForTab([second, first], 'wishlist').map((game) => game.id)).toEqual([
+      'first',
+      'second',
+    ]);
+  });
+
+  it('breaks a priority tie with the newest game on top', () => {
+    const older = createGame({ id: 'older', createdAt: '2026-01-01T00:00:00Z', priority: 0 });
+    const newer = createGame({ id: 'newer', createdAt: '2026-07-01T00:00:00Z', priority: 0 });
+
     expect(selectGamesForTab([older, newer], 'wishlist').map((game) => game.id)).toEqual([
       'newer',
       'older',
     ]);
   });
 
-  it('sorts the other tabs by name', () => {
-    const zebra = createGame({ id: 'zebra', access: 'purchased', name: 'Zebra' });
-    const apple = createGame({ id: 'apple', access: 'purchased', name: 'Apple' });
+  it('sorts the played tab by name', () => {
+    const zebra = createGame({ id: 'zebra', isPlayed: true, name: 'Zebra' });
+    const apple = createGame({ id: 'apple', isPlayed: true, name: 'Apple' });
 
-    expect(selectGamesForTab([zebra, apple], 'available').map((game) => game.id)).toEqual([
+    expect(selectGamesForTab([zebra, apple], 'played').map((game) => game.id)).toEqual([
       'apple',
       'zebra',
     ]);
   });
 
   it('does not mutate the games it was given', () => {
-    const games = [newer, older];
+    const games = [second, first];
 
     selectGamesForTab(games, 'wishlist');
 
-    expect(games.map((game) => game.id)).toEqual(['newer', 'older']);
+    expect(games.map((game) => game.id)).toEqual(['second', 'first']);
   });
 });
 
 describe('findTabForGame', () => {
-  it('prefers the available tab whenever access exists', () => {
-    expect(findTabForGame(ownedPlayed)).toBe('available');
-  });
-
-  it('falls back to the played tab when access is gone', () => {
+  it('sends a played game to the played tab whether it is owned or not', () => {
+    expect(findTabForGame(ownedPlayed)).toBe('played');
     expect(findTabForGame(lostAccessPlayed)).toBe('played');
   });
 
-  it('uses the wanted tab for a game that is neither owned nor played', () => {
+  it('keeps an unplayed game in the wishlist even when it is owned', () => {
     expect(findTabForGame(wanted)).toBe('wishlist');
+    expect(findTabForGame(ownedUnplayed)).toBe('wishlist');
   });
 });

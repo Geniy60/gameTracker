@@ -1,41 +1,40 @@
-import type { GameAccess, GamePlatform, MainTab } from './types';
+import type { GameAccess, GamePlatform, MainTab, WishlistFilter } from './types';
 
 export const strings = {
   app: {
     title: 'GameTracker',
   },
-  // Short labels: three tabs share one row, so longer names do not fit.
   tabs: {
-    wishlist: 'Хочу',
-    available: 'Есть',
-    played: 'Играл',
+    wishlist: 'Хочу поиграть',
+    played: 'Уже играл',
   } satisfies Record<MainTab, string>,
+  wishlistFilters: {
+    all: 'Все',
+    owned: 'Есть',
+    toBuy: 'Купить',
+  } satisfies Record<WishlistFilter, string>,
   search: {
     games: 'Поиск игры',
   },
   empty: {
     wishlist: {
       title: 'Список желаний пуст',
-      message: 'Здесь будут игры, к которым пока нет доступа, но поиграть хочется.',
-    },
-    available: {
-      title: 'Доступных игр пока нет',
-      message: 'Здесь будут игры, к которым есть доступ: купленные, из подписки или у друга.',
+      message: 'Здесь будут игры, в которые хочется поиграть.',
     },
     played: {
       title: 'Пройденных игр пока нет',
-      message: 'Здесь будут игры, в которые ты уже играл, даже если доступ к ним пропал.',
+      message: 'Здесь будут игры, в которые ты уже играл.',
     },
     filtered: {
       title: 'Ничего не найдено',
-      message: 'Попробуй изменить запрос или сбросить поиск.',
+      message: 'Попробуй изменить запрос или сбросить фильтры.',
     },
   } satisfies Record<MainTab | 'filtered', { message: string; title: string }>,
   actions: {
     cancel: 'Отмена',
     delete: 'Удалить',
     ok: 'ОК',
-    resetSearch: 'Сбросить поиск',
+    resetFilters: 'Сбросить',
     save: 'Сохранить',
   },
   gameForm: {

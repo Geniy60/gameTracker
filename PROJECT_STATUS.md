@@ -222,6 +222,19 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Started the third APK build, version code 4.
+
+Details:
+
+- Build `00562600-ee9c-43cc-b738-a10223bb4db8`, submitted with `--no-wait`. It carries
+  everything since version code 3: the pinned save button, the row action menu and the
+  card marks.
+- Checked before starting: `expo-doctor` 18/18, `tsc --noEmit`, 19 tests, an Android
+  export, and the three `EXPO_PUBLIC_` variables present in the EAS `production`
+  environment.
+
+Previous step:
+
 Turned access and progress into icon tags along the bottom of the card.
 
 Details:

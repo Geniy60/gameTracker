@@ -199,6 +199,22 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Started the second APK build, version code 3.
+
+Details:
+
+- Build `a516d561-2a30-42a4-864c-6cb925febd53`, submitted with `--no-wait` from commit
+  `8b564af`. The first build carried version code 2 and predated everything the import
+  and the covers added.
+- Checked before starting: `expo-doctor` 18/18, `tsc --noEmit`, 16 tests, and an
+  Android export. All three `EXPO_PUBLIC_` variables are present in the EAS
+  `production` environment, which is the one the `apk` profile names.
+- The exported bundle was searched for `PSN_NPSSO`, `ssocookie`, `postgresql://` and
+  `psn-api`, and holds none of them: the script-only secrets stay out of the app
+  because they are not `EXPO_PUBLIC_`. The two public keys are inlined, as expected.
+
+Previous step:
+
 Fell back to the placeholder when a cover address stops working.
 
 Details:

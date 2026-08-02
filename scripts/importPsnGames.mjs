@@ -194,15 +194,23 @@ function mergeByName(titles) {
   return [...byKey.values()];
 }
 
+// Some entries are named after the trophy set rather than the game, and come back
+// as "Mortal Kombat 11 Trophies". The word has to go: the cover lookup searches by
+// name, and no game is actually called that.
 function cleanTitleName(name) {
-  return name.replace(/[™®©]/g, '').replace(/\s+/g, ' ').trim();
+  return name
+    .replace(/[™®©]/g, '')
+    .replace(/\s+Trophies$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-// Deliberately conservative: only case, trademark marks and spacing are ignored.
-// Anything cleverer would merge "Spider-Man" with "Spider-Man Remastered", and a
-// duplicate row is easier to fix by hand than a game that never arrived.
+// Deliberately conservative: only case, trademark marks, the curly apostrophe and
+// spacing are ignored. Anything cleverer would merge "Spider-Man" with "Spider-Man
+// Remastered", and a duplicate row is easier to fix by hand than a game that never
+// arrived.
 function toMatchKey(name) {
-  return cleanTitleName(name).toLowerCase();
+  return cleanTitleName(name).replace(/’/g, "'").toLowerCase();
 }
 
 function parseOptions(args) {

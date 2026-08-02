@@ -199,7 +199,7 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
-Added the PlayStation Network import script. Written but not run yet.
+Added the PlayStation Network import script and imported the first ten games with it.
 
 Details:
 
@@ -223,6 +223,16 @@ Details:
   so filling them needs a second script, which is the next step.
 - The dotenv reader moved from `applyMigration.mjs` into `scripts/loadEnv.mjs`, since
   both scripts need it now.
+- The account holds 93 titles with a trophy list. The dry run merged none of them: this
+  account has no PS4 and PS5 pair sharing one name.
+- The dry run found three entries named after the trophy set rather than the game, such
+  as `Mortal Kombat 11 Trophies`. A trailing `Trophies` is now stripped, otherwise the
+  cover lookup would search for a game that does not exist under that name.
+- Ten games were imported and a second dry run then reported 11 rows in the table and 82
+  titles still new, which is the idempotency working.
+- PSN capitalisation is kept as it comes, including shouting ones like `SILENT HILL 2`.
+  Title casing them would break `LIMBO`, `INSIDE` and `F.I.S.T.`, which are stylised that
+  way on purpose.
 
 Previous step:
 
@@ -462,8 +472,7 @@ Details:
 
 ## Next Proposed Step
 
-Run the import, first with `--dry-run`, then with `--limit 10` to see what real rows look
-like, and only then in full.
+Import the remaining 82 games, once the first ten have been looked at in the app.
 
 After that, a second script to fill the covers of rows where `cover_url` is null. It has to
 be separate: at a few hundred games that is around twice as many requests to SteamGridDB, and

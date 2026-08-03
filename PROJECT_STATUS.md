@@ -246,8 +246,12 @@ Started the fourth APK build, version code 5, as the first real release.
 
 Details:
 
-- Build `ce4f6e02-adba-4d4e-9f2d-03294dc0aeb5`, submitted with `--no-wait`. It
-  carries everything since version code 4: the tab counters, the random game roll,
+- Build `ce4f6e02-adba-4d4e-9f2d-03294dc0aeb5` errored after 56 minutes without
+  producing an artifact, which is far longer than a Gradle failure takes, so it was
+  read as an EAS-side timeout and simply started again as build
+  `0258c591-95cb-4a86-9d8b-0e2573e4ba3a`. The version code stayed at 5: the failed
+  build released nothing, and the phone still carries 4.
+- The build carries everything since version code 4: the tab counters, the random game roll,
   the rating mark and its amber, the action button moved into the marks row, the
   duplicate name warning and the reordering function.
 - Checked before starting: `expo-doctor` 18/18, `tsc --noEmit`, 23 tests, an Android

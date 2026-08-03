@@ -50,7 +50,14 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      // Takes the whole new wishlist order as [{ id, priority }, ...] and applies it
+      // in one statement.
+      gametracker_set_priorities: {
+        Args: { updates: Json };
+        Returns: undefined;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, Json>;
   };

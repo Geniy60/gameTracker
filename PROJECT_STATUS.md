@@ -188,8 +188,11 @@ rather than renumbering from one, which leaves the played ones interleaved where
 is unit tested. The new order is written into the query cache before the request, otherwise
 the list snaps back to the old order the moment the finger is lifted.
 
-Priorities are saved with plain per-row updates rather than one upsert: an upsert payload
-carrying only `id` and `priority` would be rejected as an insert against the not-null columns.
+Priorities are saved through the `gametracker_set_priorities` database function, which takes
+the whole new order as one jsonb array and applies it in a single statement. Separate updates
+per row were dozens of requests for one drag with nothing holding them together. An upsert
+would not do either: a payload carrying only `id` and `priority` is rejected as an insert
+against the not-null columns.
 
 Typing a name offers title suggestions from SteamGridDB under the field, and taking one closes
 the list. This is not only about saving typing: the cover lookup searches by name, so an exact
@@ -200,6 +203,10 @@ The add/edit screen is one form with name, cover, access, progress, platform, ra
 note fields. Access and progress are always editable, since they are what move a game between
 tabs. Rating appears once progress leaves `none` and is cleared on save otherwise; the
 database enforces the same rule with a check constraint.
+
+Saving a name that is already in the table asks before writing a second row, naming the tab
+the existing game sits in. The comparison ignores case, trademark marks, the curly apostrophe
+and repeated spaces, and lives in `src/gameDuplicates.ts`, which is unit tested.
 
 A new game inherits its defaults from the tab the add button was pressed on: the wishlist
 starts with no access and no progress, the played tab starts as purchased and finished.
@@ -234,6 +241,42 @@ profile straight away. `app.json` carries the icon, the adaptive icon set and th
 holds the Android `versionCode`, which `eas.json` reads locally through `appVersionSource`.
 
 ## Last Completed Step
+
+Warned about duplicate names on save, and made reordering one atomic request.
+
+Details:
+
+- Saving a game whose name is already in the table now asks first, naming the tab
+  the existing one sits in. The list holds 167 games, most of them from an import
+  nobody typed, so adding something already there is easy to do and hard to notice
+  later.
+- It asks rather than refuses. Two rows under one name are occasionally wanted, and
+  the app has no business being certain they are not.
+- `findDuplicateGame` in `src/gameDuplicates.ts` matches the way the PSN import
+  script does: case, trademark marks, the curly apostrophe and repeated spaces are
+  ignored, nothing else. Anything cleverer would call "Spider-Man" and "Spider-Man
+  Remastered" one game. It skips the game being saved by id, so editing a note does
+  not report a game against itself. Four unit tests, 23 in total.
+- The check runs against the whole table rather than the current tab, which is the
+  case worth catching: adding to the wishlist something already finished.
+- Applied `supabase/migrations/20260803120000_gametracker_set_priorities.sql`. It
+  adds `gametracker_set_priorities(jsonb)`, which takes the whole new order and
+  applies it in one SQL statement, and grants execute to `anon` and `authenticated`.
+- Reordering used to be one PATCH per row that moved. A drag from the bottom of 74
+  rows shifts every row above it, so that was 74 parallel requests with nothing
+  holding them together: a failure halfway left the order half written while the app
+  had already drawn the new one. It is now one call that either lands or does not.
+- The function is `language sql`, so the whole update is a single statement and needs
+  no explicit transaction. `notify pgrst, 'reload schema'` is in the migration
+  because PostgREST only exposes what its schema cache knows about.
+- Verified against the real database through the anon key, the same path the app
+  takes: the call returns 204, a row moved to an unused priority came back changed,
+  and it was then put back where it was.
+- `reorderPriorities` itself is unchanged. It reuses the priority values the wishlist
+  games already occupy, which is what keeps played games interleaved where they were;
+  only the way the result is written has changed.
+
+Previous step:
 
 Moved the row action button down into the marks row.
 
@@ -801,9 +844,6 @@ Open afterwards, from a review of the whole project:
 - A grid view of covers, three to a row, as a second way of looking at the same list. The
   app already calls itself a shelf, and a grid shows twelve games where the list shows four.
   Dragging does not follow into a grid, so the order would still be edited in the list.
-- Reordering writes one request per row that moved, so a move from the bottom of 74 rows is
-  74 parallel updates and is not atomic. A Postgres function taking the whole array would
-  make it one call. Nothing has gone wrong yet, which is why this is a note and not a step.
 - Access and progress changed from the row menu go through a full save and a refetch, so the
   mark changes a moment later. An optimistic cache write is a few lines.
 - Search matches the name only, not the note.

@@ -58,22 +58,18 @@ export async function saveGameCover(id: string, coverUrl: string): Promise<void>
   }
 }
 
-// Plain updates rather than one upsert: an upsert payload without the required
-// columns would be rejected as an insert.
+// One call rather than an update per row. A drag from the bottom of the wishlist
+// moves every row above it, and as separate requests that was dozens of them, with
+// nothing holding them together if one failed. The database function applies the
+// whole order in a single statement.
+//
+// An upsert would not do: a payload carrying only id and priority is rejected as an
+// insert against the not-null columns.
 export async function saveGamePriorities(updates: PriorityUpdate[]): Promise<void> {
-  const results = await Promise.all(
-    updates.map((update) =>
-      supabase
-        .from('gametracker_games')
-        .update({ priority: update.priority })
-        .eq('id', update.id),
-    ),
-  );
+  const { error } = await supabase.rpc('gametracker_set_priorities', { updates });
 
-  const failed = results.find((result) => result.error !== null);
-
-  if (failed?.error) {
-    throw failed.error;
+  if (error) {
+    throw error;
   }
 }
 

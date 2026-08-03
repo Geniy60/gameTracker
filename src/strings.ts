@@ -105,6 +105,9 @@ export const strings = {
     saveTitle: 'Не удалось сохранить',
     saveMessage: 'Проверь подключение к интернету и попробуй ещё раз.',
     progressTitle: 'Отметить прогресс',
+    duplicateTitle: 'Такая игра уже есть',
+    duplicateMessage: (name: string, tab: string) =>
+      `«${name}» уже во вкладке «${tab}». Сохранить вторую запись?`,
     deleteGameTitle: 'Удалить игру?',
     deleteGameMessage: (name: string) =>
       `Игра «${name}» будет удалена без возможности восстановления.`,

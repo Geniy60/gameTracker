@@ -18,6 +18,7 @@ import { AppAlertHost } from './components/AppAlertHost';
 import { MainTabs } from './components/MainTabs';
 import { GameFormScreen } from './features/games/GameFormScreen';
 import { GamesScreen } from './features/games/GamesScreen';
+import { findDuplicateGame } from './gameDuplicates';
 import { filterGamesByTab, findTabForGame, selectGamesForTab } from './gameFilters';
 import { nextPriority, reorderPriorities, type PriorityUpdate } from './gameOrder';
 import type { RootStackParamList } from './navigationTypes';
@@ -307,29 +308,61 @@ function MainStack() {
         )}
       </Stack.Screen>
       <Stack.Screen name="GameForm">
-        {({ navigation, route }) => (
-          <GameFormScreen
-            game={route.params.game}
-            newGamePriority={nextPriority(games)}
-            onBack={() => navigation.goBack()}
-            onSave={(game) => {
-              void handleSaveGame(game).then((wasSaved) => {
-                if (!wasSaved) {
-                  return;
-                }
+        {({ navigation, route }) => {
+          function saveAndClose(game: Game) {
+            void handleSaveGame(game).then((wasSaved) => {
+              if (!wasSaved) {
+                return;
+              }
 
-                // Saving can move a game out of the tab it was edited in.
-                // Follow it instead of returning to a list it no longer belongs to.
-                if (filterGamesByTab([game], activeTab).length === 0) {
-                  openTab(findTabForGame(game));
-                }
+              // Saving can move a game out of the tab it was edited in.
+              // Follow it instead of returning to a list it no longer belongs to.
+              if (filterGamesByTab([game], activeTab).length === 0) {
+                openTab(findTabForGame(game));
+              }
 
-                navigation.goBack();
-              });
-            }}
-            sourceTab={route.params.sourceTab}
-          />
-        )}
+              navigation.goBack();
+            });
+          }
+
+          // A list of 167 games is well past what anyone remembers, and most of it
+          // arrived from an import nobody typed. Adding something already in there
+          // is easy to do and hard to notice afterwards. The warning names the tab
+          // the game is already in, since finding it is the usual next question.
+          //
+          // It asks rather than refuses: two rows under one name are sometimes
+          // wanted, and the app has no business being certain about it.
+          function handleSave(game: Game) {
+            const duplicate = findDuplicateGame(games, game.name, game.id);
+
+            if (duplicate === null) {
+              saveAndClose(game);
+              return;
+            }
+
+            showAppAlert(
+              strings.alerts.duplicateTitle,
+              strings.alerts.duplicateMessage(
+                duplicate.name,
+                strings.tabs[findTabForGame(duplicate)],
+              ),
+              [
+                { text: strings.actions.cancel, style: 'cancel' },
+                { text: strings.actions.save, onPress: () => saveAndClose(game) },
+              ],
+            );
+          }
+
+          return (
+            <GameFormScreen
+              game={route.params.game}
+              newGamePriority={nextPriority(games)}
+              onBack={() => navigation.goBack()}
+              onSave={handleSave}
+              sourceTab={route.params.sourceTab}
+            />
+          );
+        }}
       </Stack.Screen>
     </Stack.Navigator>
   );

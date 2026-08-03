@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "com.evgeniy.gametracker",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#12141C",
         "foregroundImage": "./assets/android-icon-foreground.png",

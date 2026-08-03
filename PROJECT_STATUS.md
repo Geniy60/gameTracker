@@ -242,6 +242,23 @@ holds the Android `versionCode`, which `eas.json` reads locally through `appVers
 
 ## Last Completed Step
 
+Started the fourth APK build, version code 5, as the first real release.
+
+Details:
+
+- Build `ce4f6e02-adba-4d4e-9f2d-03294dc0aeb5`, submitted with `--no-wait`. It
+  carries everything since version code 4: the tab counters, the random game roll,
+  the rating mark and its amber, the action button moved into the marks row, the
+  duplicate name warning and the reordering function.
+- Checked before starting: `expo-doctor` 18/18, `tsc --noEmit`, 23 tests, an Android
+  export, and the three `EXPO_PUBLIC_` variables present in the EAS `production`
+  environment, which is the one the `apk` profile names.
+- The exported bundle was searched for `NPSSO`, `ssocookie`, `postgresql://` and
+  `psn-api` and holds none of them, so the script-only secrets are still out of the
+  app.
+
+Previous step:
+
 Warned about duplicate names on save, and made reordering one atomic request.
 
 Details:
@@ -835,11 +852,11 @@ Details:
 
 ## Next Proposed Step
 
-Use the wishlist now that it holds 72 games, and see what the manual order needs. Dragging a
-row is the only way to reorder, and nothing on a card says it can be dragged; with a list
-this long that question is finally answerable rather than theoretical.
+Live with the app. Version code 5 is the first build the owner considers a real release, and
+the next step is deliberately not a feature: what to build next should come from using it,
+not from the list below.
 
-Open afterwards, from a review of the whole project:
+Reviewed and left undone on purpose:
 
 - A grid view of covers, three to a row, as a second way of looking at the same list. The
   app already calls itself a shelf, and a grid shows twelve games where the list shows four.
@@ -847,9 +864,17 @@ Open afterwards, from a review of the whole project:
 - Access and progress changed from the row menu go through a full save and a refetch, so the
   mark changes a moment later. An optimistic cache write is a few lines.
 - Search matches the name only, not the note.
-- Whether the long press needs a visible drag handle, since nothing on a row hints that it
-  can be dragged. The queue position printed on the card would hint at it and is useful on
-  its own.
+- The note is cut to one line on the card, so a long one can only be read in the form.
+- The rating picker in the form is eleven chips over three rows, where a row of stars would
+  be one.
+- Persisting the query cache to disk, so the list draws from the last snapshot instead of a
+  spinner on a cold start and shows something at all without a network.
+- Running the new duplicate name rule over the 167 rows already in the table, in case a game
+  added by hand collided with one from the import.
+- A "playing now" flag, which is the only idea here that needs a migration.
+- The queue position on the card was offered and turned down: the owner only cares whether a
+  game sits near the top or the bottom of the queue, which scrolling already answers. Whether
+  the long press needs a visible drag handle is therefore still open, with no candidate.
 - Whether the covers should be copied into Supabase Storage instead of pointing at the
   SteamGridDB CDN. All 93 come to around 5 MB. A dead link now falls back to the
   placeholder, so this is about keeping the pictures, not about looking broken. Deferred:
